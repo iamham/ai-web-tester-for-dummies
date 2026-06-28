@@ -1,0 +1,10 @@
+name: follow_first_link
+title: Follow the first link
+description: >
+  Find the first clickable link in the main content of the page and click it.
+  Confirm that a new page loads successfully (no error page). Report which link
+  you clicked and where it led in the summary.
+enabled: true
+requires_login: false
+start_url: ""
+max_steps: 12

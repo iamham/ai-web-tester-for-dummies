@@ -1,0 +1,22 @@
+# Secrets — never commit real tokens or API keys
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Browser Use artifacts
+*.gif
+artifacts/
+conversations/
+storage_state.json
+
+# Generated test report (contains live-site screenshots; can be large)
+report.html
+report.mobile.html
+# report.sample.html is kept in git as a format preview
+
+# OS / editor cruft
+.DS_Store
+*.zip

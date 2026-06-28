@@ -1,0 +1,19 @@
+# ─────────────────────────────────────────────────────────────────────────
+# TEST CASE TEMPLATE  (this file is ignored by the runner because it starts
+# with "_". Copy it, or just use the "＋ New test" button in the web app.)
+#
+# You only need to write the `description` — the tool navigates to your site
+# first automatically, so describe just the scenario and what counts as success.
+# ─────────────────────────────────────────────────────────────────────────
+
+name: my_new_test          # unique id: lowercase letters/numbers/_/- (no spaces)
+title: My new test         # friendly name shown in the app
+description: >
+  Describe in plain English what to do and what counts as success.
+  Example: "Click the 'Sign up' button and confirm a registration form appears
+  with email and password fields."
+
+enabled: true              # include this test when running "all"
+requires_login: false      # if true, start at LOGIN_URL (set in Settings) first
+start_url: ""              # optional: start at this exact URL instead of BASE_URL
+max_steps: 20              # safety cap on how many actions the agent may take

@@ -1,0 +1,5 @@
+browser-use
+python-dotenv
+pyyaml
+uvicorn
+starlette

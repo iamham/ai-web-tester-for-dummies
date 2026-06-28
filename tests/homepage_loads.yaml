@@ -1,0 +1,10 @@
+name: homepage_loads
+title: Homepage loads
+description: >
+  Confirm the homepage loaded correctly: the main content is visible, there is no
+  error message (such as a 404, 500, or "something went wrong"), and the page is
+  not blank. Report the page title in the summary.
+enabled: true
+requires_login: false
+start_url: ""
+max_steps: 10

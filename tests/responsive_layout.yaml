@@ -1,0 +1,11 @@
+name: responsive_layout
+title: Layout renders cleanly
+description: >
+  Look at the page and verify it is rendered correctly: content fits the screen
+  width with NO horizontal scrolling, text is readable, and images are not broken
+  or overlapping. Set passed=false and describe the problem if you see overflow,
+  cut-off content, overlapping elements, or broken images.
+enabled: true
+requires_login: false
+start_url: ""
+max_steps: 12
