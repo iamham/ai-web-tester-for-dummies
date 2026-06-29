@@ -15,6 +15,12 @@ from pathlib import Path
 
 EXTRACT_CAP = 4000  # max chars of extracted page content to embed per step
 
+# Brand logo as a base64 data URI, embedded so the report stays self-contained.
+try:
+    _LOGO_URI = (Path(__file__).parent / "assets" / "logo.b64").read_text(encoding="utf-8").strip()
+except Exception:
+    _LOGO_URI = ""
+
 
 @dataclass
 class StepData:
@@ -160,9 +166,10 @@ def render_report(entries: list[TestEntry], out_path: str | Path, *,
 def _render_summary(title, generated_at, total, passed, failed, lab) -> str:
     overall = lab["pass"] if failed == 0 else lab["fail"]
     cls = "pass" if failed == 0 else "fail"
+    logo = f'<img class="rlogo" src="{_LOGO_URI}" alt="">' if _LOGO_URI else ""
     return f"""
     <header>
-      <h1>{html.escape(title)}</h1>
+      <div class="hrow">{logo}<h1>{html.escape(title)}</h1></div>
       <div class="meta">{lab['generated']} {html.escape(generated_at)}</div>
       <div class="badges">
         <span class="badge {cls}">{overall}</span>
@@ -262,7 +269,9 @@ _STYLE = """
 body { margin:0; background:var(--bg); color:var(--txt);
        font:14px/1.6 """ + _FONT + """; }
 header { padding:24px 28px; border-bottom:1px solid var(--line); background:var(--card); }
-h1 { margin:0 0 4px; font-size:20px; }
+.hrow { display:flex; align-items:center; gap:12px; }
+.rlogo { width:40px; height:40px; border-radius:9px; }
+h1 { margin:0; font-size:20px; }
 .meta { color:var(--mut); font-size:12px; }
 .badges { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
 .badge { padding:3px 10px; border-radius:99px; font-weight:600; font-size:12px; background:var(--bg); border:1px solid var(--line); }

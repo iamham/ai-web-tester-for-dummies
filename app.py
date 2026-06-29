@@ -43,6 +43,7 @@ from runner import (
 )
 
 ENV_PATH = str(Path(__file__).parent / ".env")
+LOGO_PATH = Path(__file__).parent / "assets" / "logo.png"
 
 # In-memory state for the single active run (one at a time).
 RUN: dict | None = None
@@ -207,6 +208,10 @@ async def serve_report(request: Request):
     if not report.is_file():
         return HTMLResponse("<p style='font-family:sans-serif'>No report yet — run a check first.</p>", status_code=404)
     return FileResponse(report, media_type="text/html")
+
+
+async def serve_logo(request: Request):
+    return FileResponse(LOGO_PATH, media_type="image/png")
 
 
 # --------------------------------------------------------------------------- #
@@ -566,6 +571,7 @@ async def index(request: Request):
 
 WIZARD_HTML = ("""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
 <title data-i18n="setup_doc_title">Setup — AI Web Tester for Dummies</title>
@@ -576,6 +582,7 @@ body{display:flex;min-height:100vh;align-items:center;justify-content:center;pad
 .dots{display:flex;gap:8px;flex:1}
 .dots span{width:26px;height:6px;border-radius:99px;background:var(--line)}
 .dots span.on{background:var(--primary)}
+.wiz-logo{width:72px;height:72px;display:block;margin:0 auto 14px;border-radius:16px}
 h1{font-size:22px;margin:0 0 8px} h2{font-size:19px;margin:0 0 8px}
 .wiz p{color:var(--mut);margin:0 0 14px}
 .wiz input{margin:6px 0 4px}
@@ -585,6 +592,7 @@ h1{font-size:22px;margin:0 0 8px} h2{font-size:19px;margin:0 0 8px}
 .hint{color:var(--mut);font-size:12px;margin-top:4px}
 </style></head><body>
 <div class="wiz">
+  <img src="/logo.png" class="wiz-logo" alt="">
   <div class="wiz-top">
     <div class="dots"><span data-step="1"></span><span data-step="2"></span><span data-step="3"></span></div>
     """ + _LANG_SWITCH_HTML + """
@@ -652,12 +660,14 @@ applyI18n(); gotoStep(1);
 
 INDEX_HTML = ("""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
 <title data-i18n="doc_title">AI Web Tester for Dummies</title>
 <style>""" + _BASE_CSS + """
 header{display:flex;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5}
-header h1{font-size:17px;margin:0}
+header h1{font-size:17px;margin:0;display:flex;align-items:center;gap:9px}
+.brand-logo{height:32px;width:32px;border-radius:8px}
 .spacer{flex:1}
 .chip-btn{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;color:var(--txt);max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip-btn.nudge{background:#fff7ed;border-color:#fed7aa;color:#b45309;font-weight:600}
@@ -720,7 +730,7 @@ iframe{width:100%;height:78vh;border:1px solid var(--line);border-radius:10px;ba
 .about-cause{color:var(--mut)}
 </style></head><body>
 <header>
-  <h1>🌐 AI Web Tester for Dummies</h1>
+  <h1><img src="/logo.png" class="brand-logo" alt="">AI Web Tester for Dummies</h1>
   <button class="chip-btn" id="siteChip" onclick="openSettings()"></button>
   <span class="spacer"></span>
   """ + _LANG_SWITCH_HTML + """
@@ -1101,6 +1111,8 @@ app = Starlette(routes=[
     Route("/api/run/stop", api_stop, methods=["POST"]),
     Route("/api/run/status", api_run_status, methods=["GET"]),
     Route("/report", serve_report, methods=["GET"]),
+    Route("/logo.png", serve_logo, methods=["GET"]),
+    Route("/favicon.ico", serve_logo, methods=["GET"]),
     Route("/api/settings", api_get_settings, methods=["GET"]),
     Route("/api/settings", api_set_settings, methods=["POST"]),
 ])
