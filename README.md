@@ -141,6 +141,16 @@ running anything in [`report.sample.html`](report.sample.html).
 - **One run at a time:** the web app runs a single suite at once (returns 409 if
   busy).
 
+## Author & contributing
+
+Created with ❤️ by **Sarun Peetasai** — [GitHub](https://github.com/iamham) ·
+[sarunp.com](https://sarunp.com).
+
+This is free and open source, built to make web testing accessible to everyone —
+including non-developers and teams who prefer working in Thai. Contributions are
+very welcome: ⭐ star the repo, [open an issue](https://github.com/iamham/ai-web-tester-for-dummies/issues),
+or send a pull request on [GitHub](https://github.com/iamham/ai-web-tester-for-dummies).
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT © Sarun Peetasai — see [LICENSE](LICENSE).

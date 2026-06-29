@@ -31,6 +31,26 @@ from report import TestEntry, gif_data_uri, render_report, steps_from_history
 TESTS_DIR = Path(__file__).parent / "tests"
 NAME_RE = re.compile(r"^[a-z0-9_][a-z0-9_-]*$")
 
+# Control handle for the active run, so callers can stop it mid-flight.
+_RUN_CTL: dict = {"agent": None, "stop": False}
+
+STOP_MSG = {"en": "Stopped by user", "th": "ถูกหยุดโดยผู้ใช้"}
+
+
+def request_stop() -> None:
+    """Ask the current run to stop gracefully (stops after the current step)."""
+    _RUN_CTL["stop"] = True
+    agent = _RUN_CTL["agent"]
+    if agent is not None:
+        try:
+            agent.stop()
+        except Exception:
+            pass
+
+
+def is_stop_requested() -> bool:
+    return _RUN_CTL["stop"]
+
 
 # --------------------------------------------------------------------------- #
 # Configuration
@@ -288,13 +308,23 @@ async def run_test(
             generate_gif=gif_path,
             save_conversation_path=f"conversations/{tc.name}",
         )
-        history = await agent.run(max_steps=tc.max_steps, on_step_end=_on_step_end)
+        _RUN_CTL["agent"] = agent
+        try:
+            history = await agent.run(max_steps=tc.max_steps, on_step_end=_on_step_end)
+        finally:
+            _RUN_CTL["agent"] = None
         result = history.get_structured_output(TestResult)
         steps = steps_from_history(history)
         duration = history.total_duration_seconds()
         gif_b64 = gif_data_uri(gif_path)
 
-        if result is None:
+        if _RUN_CTL["stop"]:  # user pressed Stop during this test
+            entry = TestEntry(
+                name=tc.display_title(), passed=False,
+                summary=STOP_MSG.get(lang, STOP_MSG["en"]),
+                duration=duration, started_at=started_at, gif_b64=gif_b64, steps=steps,
+            )
+        elif result is None:
             entry = TestEntry(
                 name=tc.display_title(), passed=False,
                 summary="Agent finished without a structured result",
@@ -308,11 +338,18 @@ async def run_test(
                 gif_b64=gif_b64, steps=steps,
             )
     except Exception as exc:  # keep the suite going; record the crash
-        entry = TestEntry(
-            name=tc.display_title(), passed=False, summary="Test crashed",
-            started_at=started_at, gif_b64=gif_data_uri(gif_path),
-            error="".join(traceback.format_exception(exc)),
-        )
+        if _RUN_CTL["stop"]:  # interruption from a user Stop, not a real failure
+            entry = TestEntry(
+                name=tc.display_title(), passed=False,
+                summary=STOP_MSG.get(lang, STOP_MSG["en"]),
+                started_at=started_at, gif_b64=gif_data_uri(gif_path),
+            )
+        else:
+            entry = TestEntry(
+                name=tc.display_title(), passed=False, summary="Test crashed",
+                started_at=started_at, gif_b64=gif_data_uri(gif_path),
+                error="".join(traceback.format_exception(exc)),
+            )
 
     status = "✅ PASS" if entry.passed else "❌ FAIL"
     print(f"{status}  {tc.name}: {entry.summary}")
@@ -336,6 +373,7 @@ async def run_suite(
 ) -> tuple[list[TestEntry], Path]:
     """Run selected tests (or all enabled if names is None) and write the report."""
     lang = lang or cfg.output_lang
+    _RUN_CTL["stop"] = False  # clear any stop request from a previous run
     all_cases = {tc.name: tc for tc in load_tests()}
     if names is None:
         selected = [tc for tc in all_cases.values() if tc.enabled]
@@ -344,6 +382,8 @@ async def run_suite(
 
     entries: list[TestEntry] = []
     for i, tc in enumerate(selected):
+        if _RUN_CTL["stop"]:  # user stopped between tests — don't start the next one
+            break
         if on_event:
             on_event({"type": "start", "index": i, "name": tc.display_title(),
                       "max_steps": tc.max_steps})
@@ -357,6 +397,8 @@ async def run_suite(
         if on_event:
             on_event({"type": "end", "index": i, "passed": entry.passed,
                       "summary": entry.summary})
+        if _RUN_CTL["stop"]:
+            break
 
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     title = REPORT_TITLES.get(lang, REPORT_TITLES["th"])

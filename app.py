@@ -31,9 +31,11 @@ from runner import (
     TestCase,
     config_status,
     delete_test,
+    is_stop_requested,
     load_config,
     load_test,
     load_tests,
+    request_stop,
     run_suite,
     save_test,
     valid_name,
@@ -141,7 +143,7 @@ async def _execute(names: list[str], headless: bool, lang: str):
     try:
         await run_suite(names, cfg, on_event=on_event, lang=lang)
         if RUN is not None:
-            RUN["status"] = "done"
+            RUN["status"] = "stopped" if is_stop_requested() else "done"
             RUN["report_ready"] = True
     except Exception as exc:  # never leave the run wedged in "running"
         if RUN is not None:
@@ -190,6 +192,14 @@ async def api_run_status(request: Request):
     if RUN is None:
         return JSONResponse({"status": "idle"})
     return JSONResponse(RUN)
+
+
+async def api_stop(request: Request):
+    if RUN is not None and RUN["status"] == "running":
+        RUN["status"] = "stopping"
+        request_stop()
+        return JSONResponse({"ok": True})
+    return JSONResponse({"ok": False, "error": "No run in progress."}, status_code=409)
 
 
 async def serve_report(request: Request):
@@ -244,6 +254,9 @@ I18N = {
         "settings": "⚙ Settings",
         "run_selected": "▶ Run selected",
         "run_all": "▶ Run all",
+        "stop": "■ Stop",
+        "stopping": "Stopping…",
+        "head_stopped": "🛑 Stopped",
         "show_browser": "Show browser window",
         "new_test": "＋ New test",
         "report": "Report",
@@ -289,6 +302,14 @@ I18N = {
         "ua_label": "User agent (optional)",
         "ua_ph": "browser default",
         "close": "Close",
+        "about": "ℹ️ About",
+        "about_title": "About this tool",
+        "about_made": "Created with ❤️ by Sarun Peetasai",
+        "about_cause": "AI Web Tester is free and open source. It was built to make web testing accessible to everyone — including non-developers and teams who prefer working in Thai — so anyone can check that a website works just by describing it in plain words.",
+        "about_contribute": "Contributions are very welcome — ⭐ star the repo, report a problem, or open a pull request on GitHub. Every bit helps the project grow.",
+        "about_repo": "⭐ Source & contribute",
+        "about_profile": "👤 GitHub",
+        "about_site": "🌐 sarunp.com",
         "waiting": "Waiting",
         "running_step": "Running… step {step}/{max}",
         "passed_word": "Passed",
@@ -313,6 +334,9 @@ I18N = {
         "settings": "⚙ ตั้งค่า",
         "run_selected": "▶ รันที่เลือก",
         "run_all": "▶ รันทั้งหมด",
+        "stop": "■ หยุด",
+        "stopping": "กำลังหยุด…",
+        "head_stopped": "🛑 หยุดแล้ว",
         "show_browser": "แสดงหน้าต่างเบราว์เซอร์",
         "new_test": "＋ สร้างเทสต์ใหม่",
         "report": "รายงานผล",
@@ -358,6 +382,14 @@ I18N = {
         "ua_label": "User agent (ไม่บังคับ)",
         "ua_ph": "ค่าเริ่มต้นของเบราว์เซอร์",
         "close": "ปิด",
+        "about": "ℹ️ เกี่ยวกับ",
+        "about_title": "เกี่ยวกับเครื่องมือนี้",
+        "about_made": "สร้างด้วย ❤️ โดย Sarun Peetasai",
+        "about_cause": "AI Web Tester เป็นซอฟต์แวร์ฟรีและโอเพนซอร์ส สร้างขึ้นเพื่อให้การทดสอบเว็บไซต์เป็นเรื่องง่ายสำหรับทุกคน — รวมถึงผู้ที่ไม่ใช่นักพัฒนาและทีมที่ถนัดภาษาไทย — เพียงอธิบายเป็นคำพูดธรรมดาก็ตรวจสอบเว็บไซต์ได้",
+        "about_contribute": "ยินดีรับการร่วมพัฒนาอย่างยิ่ง — ⭐ กดดาวให้โปรเจกต์ แจ้งปัญหา หรือส่ง pull request บน GitHub ทุกการช่วยเหลือมีความหมายต่อโปรเจกต์",
+        "about_repo": "⭐ ซอร์สโค้ดและร่วมพัฒนา",
+        "about_profile": "👤 GitHub",
+        "about_site": "🌐 sarunp.com",
         "waiting": "รอ",
         "running_step": "กำลังรัน… ขั้นตอนที่ {step}/{max}",
         "passed_word": "ผ่าน",
@@ -466,6 +498,7 @@ header h1{font-size:18px;margin:0;flex:1}
 button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);
   background:var(--card);color:var(--txt);padding:8px 14px}
 button.primary{background:var(--accent);color:#06101f;border:0;font-weight:700}
+button.danger{background:var(--fail);color:#fff;border:0;font-weight:700}
 button.ghost{background:transparent}
 button:disabled{opacity:.5;cursor:not-allowed}
 .langsw{display:flex;gap:4px}
@@ -506,16 +539,22 @@ textarea{min-height:120px;resize:vertical}
 iframe{width:100%;height:78vh;border:1px solid var(--line);border-radius:10px;background:#fff;margin-top:8px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .hint{color:var(--mut);font-size:12px;margin-top:4px}
+.links{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.links a.linkbtn{text-decoration:none;color:var(--txt);background:#11141a;border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-size:13px}
+.links a.linkbtn:hover{border-color:var(--accent);color:var(--accent)}
+.about-cause{color:var(--mut);line-height:1.6}
 </style></head><body>
 <header>
   <h1>🌐 AI Web Tester</h1>
   """ + _LANG_SWITCH_HTML + """
+  <button class="ghost" data-i18n="about" onclick="openAbout()">About</button>
   <button class="ghost" data-i18n="settings" onclick="openSettings()">Settings</button>
 </header>
 <main>
   <div class="toolbar">
-    <button class="primary" data-i18n="run_selected" onclick="run('selected')">Run selected</button>
-    <button data-i18n="run_all" onclick="run('all')">Run all</button>
+    <button class="primary" id="runSelBtn" data-i18n="run_selected" onclick="run('selected')">Run selected</button>
+    <button id="runAllBtn" data-i18n="run_all" onclick="run('all')">Run all</button>
+    <button class="danger" id="stopBtn" data-i18n="stop" style="display:none" onclick="stopRun()">Stop</button>
     <label class="checks" style="margin:0"><input type="checkbox" id="showBrowser"> <span data-i18n="show_browser">Show browser window</span></label>
     <span class="spacer"></span>
     <button data-i18n="new_test" onclick="openNew()">New test</button>
@@ -586,6 +625,23 @@ iframe{width:100%;height:78vh;border:1px solid var(--line);border-radius:10px;ba
   </div>
 </div>
 
+<div class="overlay" id="aboutOverlay">
+  <div class="modal">
+    <h2 data-i18n="about_title">About this tool</h2>
+    <p style="font-size:16px;margin:4px 0 14px" data-i18n="about_made">Created with ❤️ by Sarun Peetasai</p>
+    <p class="about-cause" data-i18n="about_cause"></p>
+    <p class="about-cause" data-i18n="about_contribute"></p>
+    <div class="links">
+      <a class="linkbtn" href="https://github.com/iamham/ai-web-tester-for-dummies" target="_blank" rel="noopener" data-i18n="about_repo">Source &amp; contribute</a>
+      <a class="linkbtn" href="https://github.com/iamham" target="_blank" rel="noopener" data-i18n="about_profile">GitHub</a>
+      <a class="linkbtn" href="https://sarunp.com" target="_blank" rel="noopener" data-i18n="about_site">sarunp.com</a>
+    </div>
+    <div class="modal-actions">
+      <button data-i18n="close" onclick="closeModal('aboutOverlay')">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /*__I18N__*/
 """ + _LANG_BOOT + """
@@ -626,7 +682,22 @@ async function run(mode,one){
   const d=await r.json();
   if(d.error){alert(d.error);return;}
   document.getElementById('reportWrap').style.display='none';
+  setRunning(true);
   startPolling();
+}
+
+async function stopRun(){
+  const b=document.getElementById('stopBtn');
+  b.disabled=true; b.textContent=t('stopping');
+  await fetch('/api/run/stop',{method:'POST'});
+}
+
+function setRunning(running){
+  const stop=document.getElementById('stopBtn');
+  if(running){ stop.style.display=''; stop.disabled=false; stop.textContent=t('stop'); }
+  else { stop.style.display='none'; }
+  document.getElementById('runSelBtn').disabled=running;
+  document.getElementById('runAllBtn').disabled=running;
 }
 
 function startPolling(){
@@ -636,16 +707,17 @@ function startPolling(){
 }
 async function pollStatus(){
   const s=await (await fetch('/api/run/status')).json();
-  if(s.status==='idle'){return;}
+  if(s.status==='idle'){ setRunning(false); return; }
   LAST_STATUS=s; renderProgress(s);
-  if(s.status==='done'||s.status==='error'){
-    clearInterval(POLL); POLL=null;
-    if(s.report_ready){
-      document.getElementById('reportWrap').style.display='block';
-      document.getElementById('report').src='/report?ts='+Date.now();
-    }
-    if(s.status==='error') alert(t('alert_run_err')+(s.error||''));
+  if(s.status==='running'||s.status==='stopping'){ setRunning(true); if(!POLL) startPolling(); return; }
+  // terminal: done | stopped | error
+  if(POLL){ clearInterval(POLL); POLL=null; }
+  setRunning(false);
+  if(s.report_ready){
+    document.getElementById('reportWrap').style.display='block';
+    document.getElementById('report').src='/report?ts='+Date.now();
   }
+  if(s.status==='error') alert(t('alert_run_err')+(s.error||''));
 }
 function renderProgress(s){
   const rows=s.tests.map(x=>{
@@ -659,7 +731,11 @@ function renderProgress(s){
        <div class="bar"><i style="width:${x.status==='pass'||x.status==='fail'?100:pct}%"></i></div>
        <span class="muted">${label}</span></div>`;
   }).join('');
-  const head = s.status==='running'? t('head_running') : s.status==='done'? t('head_done') : t('head_error');
+  const head = s.status==='running'? t('head_running')
+             : s.status==='stopping'? t('stopping')
+             : s.status==='done'? t('head_done')
+             : s.status==='stopped'? t('head_stopped')
+             : t('head_error');
   document.getElementById('progress').innerHTML='<b>'+head+'</b>'+rows;
 }
 
@@ -721,6 +797,7 @@ async function saveSettings(){
   closeModal('setOverlay');
 }
 
+function openAbout(){show('aboutOverlay');}
 function show(id){document.getElementById(id).classList.add('show');}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function val(id){return document.getElementById(id).value;}
@@ -746,6 +823,7 @@ app = Starlette(routes=[
     Route("/api/tests/{name}", api_update_test, methods=["PUT"]),
     Route("/api/tests/{name}", api_delete_test, methods=["DELETE"]),
     Route("/api/run", api_run, methods=["POST"]),
+    Route("/api/run/stop", api_stop, methods=["POST"]),
     Route("/api/run/status", api_run_status, methods=["GET"]),
     Route("/report", serve_report, methods=["GET"]),
     Route("/api/settings", api_get_settings, methods=["GET"]),
