@@ -3,26 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
 <title>AI Web Tester — รายงานผลการทดสอบ (1280x800)</title>
 <style>
-:root { --bg:#0f1115; --card:#171a21; --line:#262b36; --txt:#e6e8ec; --mut:#9aa3b2;
-        --pass:#2ecc71; --fail:#ff5c5c; --accent:#5b9dff; }
+:root { --bg:#f6f7f9; --card:#ffffff; --line:#e3e6eb; --txt:#1f2430; --mut:#6b7280;
+        --pass:#16a34a; --fail:#dc2626; --accent:#2563eb; }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--txt);
-       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
-header { padding:24px 28px; border-bottom:1px solid var(--line); }
+       font:14px/1.6 "Google Sans","Noto Sans Thai","Sarabun","Leelawadee UI",Tahoma,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+header { padding:24px 28px; border-bottom:1px solid var(--line); background:var(--card); }
 h1 { margin:0 0 4px; font-size:20px; }
 .meta { color:var(--mut); font-size:12px; }
 .badges { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
-.badge { padding:3px 10px; border-radius:99px; font-weight:600; font-size:12px; background:var(--card); border:1px solid var(--line); }
+.badge { padding:3px 10px; border-radius:99px; font-weight:600; font-size:12px; background:var(--bg); border:1px solid var(--line); }
 .badge.pass { color:var(--pass); } .badge.fail { color:var(--fail); } .badge.total { color:var(--accent); }
-.test { margin:18px 28px; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--mut); border-radius:8px; overflow:hidden; }
+.test { margin:18px 28px; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--mut); border-radius:10px; overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.04); }
 .test.pass { border-left-color:var(--pass); } .test.fail { border-left-color:var(--fail); }
 .test-head { display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; user-select:none; }
-.test-head:hover { background:#1c2029; }
+.test-head:hover { background:#f0f3f8; }
 .status { font-weight:700; font-size:12px; padding:2px 8px; border-radius:4px; }
-.status.pass { background:rgba(46,204,113,.15); color:var(--pass); }
-.status.fail { background:rgba(255,92,92,.15); color:var(--fail); }
+.status.pass { background:rgba(22,163,74,.12); color:var(--pass); }
+.status.fail { background:rgba(220,38,38,.12); color:var(--fail); }
 .test-name { font-weight:600; }
 .test-summary { color:var(--mut); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .test-time { color:var(--mut); font-size:12px; white-space:nowrap; font-variant-numeric:tabular-nums; }
@@ -32,10 +34,10 @@ h1 { margin:0 0 4px; font-size:20px; }
 .gifbox img { max-width:100%; border:1px solid var(--line); border-radius:6px; margin-top:8px; }
 .extracted { flex:1; }
 .extracted summary { cursor:pointer; color:var(--accent); }
-.extracted pre { white-space:pre-wrap; word-break:break-word; background:#11141a; padding:10px; border-radius:6px; margin:6px 0 0; max-height:320px; overflow:auto; font-size:12px; }
+.extracted pre { white-space:pre-wrap; word-break:break-word; background:var(--bg); padding:10px; border-radius:6px; margin:6px 0 0; max-height:320px; overflow:auto; font-size:12px; }
 .test.collapsed .test-body { display:none; }
 .test-body { padding:0 16px 16px; }
-.details, .crash { padding:10px 12px; margin:8px 0; background:#11141a; border-radius:6px; font-size:13px; }
+.details, .crash { padding:10px 12px; margin:8px 0; background:var(--bg); border-radius:6px; font-size:13px; }
 .crash pre { white-space:pre-wrap; color:var(--fail); margin:6px 0 0; }
 .step { display:grid; grid-template-columns:340px 1fr; gap:16px; padding:16px 0; border-top:1px solid var(--line); }
 .shot img { width:100%; border:1px solid var(--line); border-radius:6px; cursor:zoom-in; display:block; }
@@ -47,8 +49,8 @@ h1 { margin:0 0 4px; font-size:20px; }
 .kv .v { flex:1; }
 .kv.err .v { color:var(--fail); }
 .actions { margin:0; padding-left:0; list-style:none; }
-.actions code { background:#11141a; padding:2px 6px; border-radius:4px; font-size:12px; }
-#lightbox { position:fixed; inset:0; background:rgba(0,0,0,.9); display:none; align-items:center; justify-content:center; cursor:zoom-out; z-index:99; }
+.actions code { background:var(--bg); padding:2px 6px; border-radius:4px; font-size:12px; }
+#lightbox { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; cursor:zoom-out; z-index:99; }
 #lightbox img { max-width:95vw; max-height:95vh; border-radius:6px; }
 @media (max-width:720px){ .step{ grid-template-columns:1fr; } }
 </style>
@@ -96,7 +98,7 @@ h1 { margin:0 0 4px; font-size:20px; }
         <span class="test-time">2026-06-29 10:01:00</span>
         <span class="test-dur">9.1s · 1 ขั้นตอน</span>
       </div>
-      <div class="test-body"><div class="details"><strong>รายละเอียด:</strong> แบนเนอร์ขยายเกินความกว้างหน้าจอ ทำให้เกิดการเลื่อนแนวนอน</div><div class="steps">
+      <div class="test-body"><div class="details"><strong>รายละเอียด:</strong> แบนเนอร์ขยายเกินความกว้างหน้าจอ</div><div class="steps">
       <div class="step">
         <div class="shot"><img loading="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" onclick="zoom(this.src)" alt="step 1"></div>
         <div class="info">
