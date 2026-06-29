@@ -145,6 +145,13 @@ running anything in [`report.sample.html`](report.sample.html).
 - **One run at a time:** the web app runs a single suite at once (returns 409 if
   busy).
 
+## Origin
+
+<img src="https://campaigns.amazebiz.com/logo.png" alt="Amaze" height="48">
+
+Originally developed for **Amaze** internal use, and open-sourced so anyone can
+use it freely.
+
 ## Author & contributing
 
 Created with ❤️ by **Sarun Peetasai** — [GitHub](https://github.com/iamham) ·
