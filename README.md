@@ -7,13 +7,15 @@ self-contained HTML report with a screenshot of **every step**, the agent's
 reasoning, and a pass/fail result.
 
 Built on [Browser Use](https://github.com/browser-use/browser-use). Runs entirely
-on your own machine.
+on your own machine. The interface is **bilingual (ไทย / English)** with a
+switcher and defaults to Thai — and the AI writes its result summaries in the
+selected language.
 
 There are two ways to use it:
 
 | Audience | How | Start here |
 |----------|-----|------------|
-| **Non-technical (QA, PM)** | A local web app in your browser | **[QA_GUIDE.md](QA_GUIDE.md)** |
+| **Non-technical (QA, PM)** | A local web app in your browser | **[QA_GUIDE.md](QA_GUIDE.md)** · 🇹🇭 **[ภาษาไทย](QA_GUIDE.th.md)** |
 | **Developers / CI** | Command line | [Developer setup](#developer-setup) |
 
 > ⚠️ AI-driven tests are **non-deterministic** — great for smoke and exploratory
@@ -76,6 +78,7 @@ Set these via the web app's **⚙ Settings**, or in a `.env` file (see
 | `LOGIN_URL` | Optional URL that logs you in (used by `requires_login` tests) | — |
 | `CONTEXT_HINT` | Extra standing instructions added to every test | — |
 | `LLM_MODEL` | `gemini-2.5-flash` (fast) or `gemini-2.5-pro` (smarter) | `gemini-2.5-flash` |
+| `OUTPUT_LANG` | Report + AI summary language: `th` or `en` (web UI has its own switcher) | `th` |
 | `VIEWPORT_WIDTH` / `VIEWPORT_HEIGHT` | Browser size | `1280` / `800` |
 | `DEVICE_SCALE` / `USER_AGENT` | For mobile emulation (e.g. `390x844`, scale `2`) | `1` / browser default |
 | `ALLOWED_DOMAINS` | Restrict the agent (comma-separated); auto-derived if blank | — |

@@ -115,40 +115,67 @@ def _format_action(action: dict) -> str:
 # HTML rendering
 # --------------------------------------------------------------------------- #
 
-def render_report(entries: list[TestEntry], out_path: str | Path, *, generated_at: str, title: str) -> Path:
+# Structural labels for the report, per language. The agent's own output
+# (summaries, reasoning) is in whatever language the model produced.
+LABELS = {
+    "en": {
+        "generated": "Generated", "pass": "PASS", "fail": "FAIL", "tests": "tests",
+        "passed": "passed", "failed": "failed", "details": "Details:",
+        "crashed": "Crashed:", "run_gif": "▶ Run animation (GIF)", "steps": "steps",
+        "step": "Step", "evaluation": "evaluation", "thinking": "thinking",
+        "next_goal": "next goal", "actions": "actions", "error": "error",
+        "extracted": "extracted", "page_content": "page content", "chars": "chars",
+        "no_screenshot": "no screenshot",
+    },
+    "th": {
+        "generated": "สร้างเมื่อ", "pass": "ผ่าน", "fail": "ไม่ผ่าน", "tests": "เทสต์",
+        "passed": "ผ่าน", "failed": "ไม่ผ่าน", "details": "รายละเอียด:",
+        "crashed": "ขัดข้อง:", "run_gif": "▶ ภาพเคลื่อนไหว (GIF)", "steps": "ขั้นตอน",
+        "step": "ขั้นตอนที่", "evaluation": "การประเมิน", "thinking": "การวิเคราะห์",
+        "next_goal": "เป้าหมายถัดไป", "actions": "การกระทำ", "error": "ข้อผิดพลาด",
+        "extracted": "เนื้อหา", "page_content": "เนื้อหาหน้าเว็บ", "chars": "ตัวอักษร",
+        "no_screenshot": "ไม่มีภาพหน้าจอ",
+    },
+}
+
+
+def render_report(entries: list[TestEntry], out_path: str | Path, *,
+                  generated_at: str, title: str, lang: str = "th") -> Path:
     out_path = Path(out_path)
+    lab = LABELS.get(lang, LABELS["th"])
     total = len(entries)
     passed = sum(1 for e in entries if e.passed)
     failed = total - passed
 
-    body = [_render_summary(title, generated_at, total, passed, failed)]
+    body = [_render_summary(title, generated_at, total, passed, failed, lab)]
     for e in entries:
-        body.append(_render_test(e))
+        body.append(_render_test(e, lab))
 
-    doc = _PAGE.format(title=html.escape(title), style=_STYLE, script=_SCRIPT, body="\n".join(body))
+    doc = _PAGE.format(title=html.escape(title), lang=html.escape(lang),
+                       style=_STYLE, script=_SCRIPT, body="\n".join(body))
     out_path.write_text(doc, encoding="utf-8")
     return out_path
 
 
-def _render_summary(title, generated_at, total, passed, failed) -> str:
-    overall = "PASS" if failed == 0 else "FAIL"
+def _render_summary(title, generated_at, total, passed, failed, lab) -> str:
+    overall = lab["pass"] if failed == 0 else lab["fail"]
     cls = "pass" if failed == 0 else "fail"
     return f"""
     <header>
       <h1>{html.escape(title)}</h1>
-      <div class="meta">Generated {html.escape(generated_at)}</div>
+      <div class="meta">{lab['generated']} {html.escape(generated_at)}</div>
       <div class="badges">
         <span class="badge {cls}">{overall}</span>
-        <span class="badge total">{total} tests</span>
-        <span class="badge pass">{passed} passed</span>
-        <span class="badge fail">{failed} failed</span>
+        <span class="badge total">{total} {lab['tests']}</span>
+        <span class="badge pass">{passed} {lab['passed']}</span>
+        <span class="badge fail">{failed} {lab['failed']}</span>
       </div>
     </header>"""
 
 
-def _render_test(e: TestEntry) -> str:
+def _render_test(e: TestEntry, lab) -> str:
     cls = "pass" if e.passed else "fail"
-    status = "PASS" if e.passed else "FAIL"
+    status = lab["pass"] if e.passed else lab["fail"]
     parts = [f"""
     <section class="test {cls}">
       <div class="test-head" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -156,34 +183,34 @@ def _render_test(e: TestEntry) -> str:
         <span class="test-name">{html.escape(e.name)}</span>
         <span class="test-summary">{html.escape(e.summary or '')}</span>
         <span class="test-time">{html.escape(e.started_at)}</span>
-        <span class="test-dur">{e.duration:.1f}s · {len(e.steps)} steps</span>
+        <span class="test-dur">{e.duration:.1f}s · {len(e.steps)} {lab['steps']}</span>
       </div>
       <div class="test-body">"""]
 
     if e.details:
-        parts.append(f'<div class="details"><strong>Details:</strong> {html.escape(e.details)}</div>')
+        parts.append(f'<div class="details"><strong>{lab["details"]}</strong> {html.escape(e.details)}</div>')
     if e.error:
-        parts.append(f'<div class="crash"><strong>Crashed:</strong> <pre>{html.escape(e.error)}</pre></div>')
+        parts.append(f'<div class="crash"><strong>{lab["crashed"]}</strong> <pre>{html.escape(e.error)}</pre></div>')
     if e.gif_b64:
         parts.append(
-            '<details class="gifbox"><summary>▶ Run animation (GIF)</summary>'
+            f'<details class="gifbox"><summary>{lab["run_gif"]}</summary>'
             f'<img loading="lazy" src="data:image/gif;base64,{e.gif_b64}" alt="run animation"></details>'
         )
 
     parts.append('<div class="steps">')
     for s in e.steps:
-        parts.append(_render_step(s))
+        parts.append(_render_step(s, lab))
     parts.append("</div></div></section>")
     return "".join(parts)
 
 
-def _render_step(s: StepData) -> str:
+def _render_step(s: StepData, lab) -> str:
     img = ""
     if s.screenshot_b64:
         src = f"data:image/png;base64,{s.screenshot_b64}"
         img = f'<img loading="lazy" src="{src}" onclick="zoom(this.src)" alt="step {s.index}">'
     else:
-        img = '<div class="noshot">no screenshot</div>'
+        img = f'<div class="noshot">{lab["no_screenshot"]}</div>'
 
     def row(label, value, klass=""):
         if not value:
@@ -193,15 +220,15 @@ def _render_step(s: StepData) -> str:
     actions_html = ""
     if s.actions:
         items = "".join(f"<li><code>{html.escape(a)}</code></li>" for a in s.actions)
-        actions_html = f'<div class="kv"><span class="k">actions</span><ul class="actions">{items}</ul></div>'
+        actions_html = f'<div class="kv"><span class="k">{lab["actions"]}</span><ul class="actions">{items}</ul></div>'
 
-    err_html = row("error", s.error, "err") if s.error else ""
+    err_html = row(lab["error"], s.error, "err") if s.error else ""
 
     extracted_html = ""
     if s.extracted:
         extracted_html = (
-            '<div class="kv"><span class="k">extracted</span>'
-            f'<details class="extracted"><summary>page content ({len(s.extracted)} chars)</summary>'
+            f'<div class="kv"><span class="k">{lab["extracted"]}</span>'
+            f'<details class="extracted"><summary>{lab["page_content"]} ({len(s.extracted)} {lab["chars"]})</summary>'
             f'<pre>{html.escape(s.extracted)}</pre></details></div>'
         )
 
@@ -209,10 +236,10 @@ def _render_step(s: StepData) -> str:
       <div class="step">
         <div class="shot">{img}</div>
         <div class="info">
-          <div class="step-no">Step {s.index}{f' · <a href="{html.escape(s.url)}" target="_blank">{html.escape(_short_url(s.url))}</a>' if s.url else ''}</div>
-          {row("evaluation", s.evaluation)}
-          {row("thinking", s.thinking)}
-          {row("next goal", s.next_goal)}
+          <div class="step-no">{lab['step']} {s.index}{f' · <a href="{html.escape(s.url)}" target="_blank">{html.escape(_short_url(s.url))}</a>' if s.url else ''}</div>
+          {row(lab["evaluation"], s.evaluation)}
+          {row(lab["thinking"], s.thinking)}
+          {row(lab["next_goal"], s.next_goal)}
           {actions_html}
           {extracted_html}
           {err_html}
@@ -283,7 +310,7 @@ document.addEventListener('DOMContentLoaded',function(){
 """
 
 _PAGE = """<!doctype html>
-<html lang="en">
+<html lang="{lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

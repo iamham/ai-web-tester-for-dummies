@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Web Tester — Report (1280x800)</title>
+<title>AI Web Tester — รายงานผลการทดสอบ (1280x800)</title>
 <style>
 :root { --bg:#0f1115; --card:#171a21; --line:#262b36; --txt:#e6e8ec; --mut:#9aa3b2;
         --pass:#2ecc71; --fail:#ff5c5c; --accent:#5b9dff; }
@@ -56,69 +56,57 @@ h1 { margin:0 0 4px; font-size:20px; }
 <body>
 
     <header>
-      <h1>AI Web Tester — Report (1280x800)</h1>
-      <div class="meta">Generated 2026-06-28 10:05:00</div>
+      <h1>AI Web Tester — รายงานผลการทดสอบ (1280x800)</h1>
+      <div class="meta">สร้างเมื่อ 2026-06-29 10:05:00</div>
       <div class="badges">
-        <span class="badge fail">FAIL</span>
-        <span class="badge total">2 tests</span>
-        <span class="badge pass">1 passed</span>
-        <span class="badge fail">1 failed</span>
+        <span class="badge fail">ไม่ผ่าน</span>
+        <span class="badge total">2 เทสต์</span>
+        <span class="badge pass">1 ผ่าน</span>
+        <span class="badge fail">1 ไม่ผ่าน</span>
       </div>
     </header>
 
     <section class="test pass">
       <div class="test-head" onclick="this.parentElement.classList.toggle('collapsed')">
-        <span class="status pass">PASS</span>
-        <span class="test-name">Homepage loads</span>
-        <span class="test-summary">Homepage rendered; title &#x27;Example Domain&#x27;.</span>
-        <span class="test-time">2026-06-28 10:00:00</span>
-        <span class="test-dur">8.2s · 2 steps</span>
+        <span class="status pass">ผ่าน</span>
+        <span class="test-name">หน้าแรกโหลด</span>
+        <span class="test-summary">หน้าแรกแสดงผลถูกต้อง ชื่อหน้า: Example Domain</span>
+        <span class="test-time">2026-06-29 10:00:00</span>
+        <span class="test-dur">8.2s · 1 ขั้นตอน</span>
       </div>
-      <div class="test-body"><details class="gifbox"><summary>▶ Run animation (GIF)</summary><img loading="lazy" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="run animation"></details><div class="steps">
+      <div class="test-body"><details class="gifbox"><summary>▶ ภาพเคลื่อนไหว (GIF)</summary><img loading="lazy" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="run animation"></details><div class="steps">
       <div class="step">
         <div class="shot"><img loading="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" onclick="zoom(this.src)" alt="step 1"></div>
         <div class="info">
-          <div class="step-no">Step 1 · <a href="https://example.com" target="_blank">https://example.com</a></div>
-          <div class="kv "><span class="k">evaluation</span><span class="v">Success - page loaded</span></div>
-          <div class="kv "><span class="k">thinking</span><span class="v">Navigating to the site.</span></div>
-          <div class="kv "><span class="k">next goal</span><span class="v">Confirm content visible</span></div>
-          <div class="kv"><span class="k">actions</span><ul class="actions"><li><code>go_to_url(url=&quot;https://example.com&quot;)</code></li></ul></div>
-          <div class="kv"><span class="k">extracted</span><details class="extracted"><summary>page content (64 chars)</summary><pre>Example Domain. This domain is for use in illustrative examples.</pre></details></div>
-          
-        </div>
-      </div>
-      <div class="step">
-        <div class="shot"><img loading="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" onclick="zoom(this.src)" alt="step 2"></div>
-        <div class="info">
-          <div class="step-no">Step 2 · <a href="https://example.com" target="_blank">https://example.com</a></div>
-          <div class="kv "><span class="k">evaluation</span><span class="v">Success</span></div>
-          <div class="kv "><span class="k">thinking</span><span class="v">Main content is visible, no errors.</span></div>
-          <div class="kv "><span class="k">next goal</span><span class="v">Finish</span></div>
-          <div class="kv"><span class="k">actions</span><ul class="actions"><li><code>done(text=&quot;homepage ok&quot;,success=true)</code></li></ul></div>
-          
+          <div class="step-no">ขั้นตอนที่ 1 · <a href="https://example.com" target="_blank">https://example.com</a></div>
+          <div class="kv "><span class="k">การประเมิน</span><span class="v">สำเร็จ - หน้าโหลดแล้ว</span></div>
+          <div class="kv "><span class="k">การวิเคราะห์</span><span class="v">กำลังเปิดเว็บไซต์</span></div>
+          <div class="kv "><span class="k">เป้าหมายถัดไป</span><span class="v">ตรวจสอบว่าเนื้อหาแสดงผล</span></div>
+          <div class="kv"><span class="k">การกระทำ</span><ul class="actions"><li><code>go_to_url(url=&quot;https://example.com&quot;)</code></li></ul></div>
+          <div class="kv"><span class="k">เนื้อหา</span><details class="extracted"><summary>เนื้อหาหน้าเว็บ (64 ตัวอักษร)</summary><pre>Example Domain. This domain is for use in illustrative examples.</pre></details></div>
           
         </div>
       </div></div></div></section>
 
     <section class="test fail">
       <div class="test-head" onclick="this.parentElement.classList.toggle('collapsed')">
-        <span class="status fail">FAIL</span>
-        <span class="test-name">Layout renders cleanly</span>
-        <span class="test-summary">Horizontal overflow on a wide banner.</span>
-        <span class="test-time">2026-06-28 10:01:00</span>
-        <span class="test-dur">9.1s · 1 steps</span>
+        <span class="status fail">ไม่ผ่าน</span>
+        <span class="test-name">ตรวจการแสดงผลหน้าจอ</span>
+        <span class="test-summary">พบการเลื่อนแนวนอนจากแบนเนอร์ที่กว้างเกินไป</span>
+        <span class="test-time">2026-06-29 10:01:00</span>
+        <span class="test-dur">9.1s · 1 ขั้นตอน</span>
       </div>
-      <div class="test-body"><div class="details"><strong>Details:</strong> A banner extends past the viewport width causing horizontal scroll.</div><div class="steps">
+      <div class="test-body"><div class="details"><strong>รายละเอียด:</strong> แบนเนอร์ขยายเกินความกว้างหน้าจอ ทำให้เกิดการเลื่อนแนวนอน</div><div class="steps">
       <div class="step">
         <div class="shot"><img loading="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" onclick="zoom(this.src)" alt="step 1"></div>
         <div class="info">
-          <div class="step-no">Step 1 · <a href="https://example.com" target="_blank">https://example.com</a></div>
-          <div class="kv "><span class="k">evaluation</span><span class="v">Found an issue</span></div>
-          <div class="kv "><span class="k">thinking</span><span class="v">Checking for overflow.</span></div>
-          <div class="kv "><span class="k">next goal</span><span class="v">Report it</span></div>
-          <div class="kv"><span class="k">actions</span><ul class="actions"><li><code>scroll(down=true)</code></li></ul></div>
+          <div class="step-no">ขั้นตอนที่ 1 · <a href="https://example.com" target="_blank">https://example.com</a></div>
+          <div class="kv "><span class="k">การประเมิน</span><span class="v">พบปัญหา</span></div>
+          <div class="kv "><span class="k">การวิเคราะห์</span><span class="v">กำลังตรวจหา overflow</span></div>
+          <div class="kv "><span class="k">เป้าหมายถัดไป</span><span class="v">รายงานปัญหา</span></div>
+          <div class="kv"><span class="k">การกระทำ</span><ul class="actions"><li><code>scroll(down=true)</code></li></ul></div>
           
-          <div class="kv err"><span class="k">error</span><span class="v">Horizontal scrollbar present</span></div>
+          <div class="kv err"><span class="k">ข้อผิดพลาด</span><span class="v">พบแถบเลื่อนแนวนอน</span></div>
         </div>
       </div></div></div></section>
 <div id="lightbox"><img alt="zoom"></div>

@@ -1,10 +1,14 @@
 # AI Web Tester — User Guide
 
+> 🇹🇭 ภาษาไทย: see **[QA_GUIDE.th.md](QA_GUIDE.th.md)**
+
 A simple tool that uses AI to test a website like a real person would — it opens
-the site in a browser, follows the steps you describe in plain English, and gives
+the site in a browser, follows the steps you describe in plain language, and gives
 you a report with screenshots of every step.
 
 **You do not need to know any programming.** Everything happens in your web browser.
+The interface is available in **Thai and English** — use the **ไทย / EN** switch in
+the top-right corner. It starts in Thai.
 
 ---
 

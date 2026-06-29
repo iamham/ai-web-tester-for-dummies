@@ -50,6 +50,7 @@ class Config:
     context_hint: str
     allowed_domains: list[str] | None
     report_path: str
+    output_lang: str
 
 
 def load_config() -> Config:
@@ -69,6 +70,7 @@ def load_config() -> Config:
         context_hint=os.environ.get("CONTEXT_HINT", ""),
         allowed_domains=[d.strip() for d in allowed_raw.split(",") if d.strip()] or None,
         report_path=os.environ.get("REPORT_PATH", "report.html"),
+        output_lang=os.environ.get("OUTPUT_LANG", "th"),
     )
 
 
@@ -206,7 +208,7 @@ def start_url_for(tc: TestCase, cfg: Config) -> str:
     return cfg.base_url
 
 
-def compose_task(tc: TestCase, cfg: Config) -> str:
+def compose_task(tc: TestCase, cfg: Config, lang: str = "th") -> str:
     """Build the full agent prompt from a test case's plain-English description."""
     parts: list[str] = []
     if cfg.context_hint.strip():
@@ -218,6 +220,11 @@ def compose_task(tc: TestCase, cfg: Config) -> str:
             "Then do the following: "
         )
     parts.append(tc.description.strip())
+    if lang == "th":
+        parts.append(
+            "\n\nIMPORTANT: Write the 'summary' and 'details' fields of your final "
+            "result in Thai language (ภาษาไทย)."
+        )
     return "".join(parts)
 
 
@@ -257,6 +264,7 @@ async def run_test(
     cfg: Config,
     *,
     on_step: Callable[[int], None] | None = None,
+    lang: str = "th",
 ) -> TestEntry:
     """Run one test case and return a report entry. Never raises."""
     print(f"\n{'=' * 70}\n▶  {tc.name}\n{'=' * 70}")
@@ -273,7 +281,7 @@ async def run_test(
 
     try:
         agent = Agent(
-            task=compose_task(tc, cfg),
+            task=compose_task(tc, cfg, lang),
             llm=make_llm(cfg),
             browser=make_browser(cfg),
             output_model_schema=TestResult,
@@ -313,13 +321,21 @@ async def run_test(
     return entry
 
 
+REPORT_TITLES = {
+    "en": "AI Web Tester — Report",
+    "th": "AI Web Tester — รายงานผลการทดสอบ",
+}
+
+
 async def run_suite(
     names: list[str] | None,
     cfg: Config,
     *,
     on_event: Callable[[dict], None] | None = None,
+    lang: str | None = None,
 ) -> tuple[list[TestEntry], Path]:
     """Run selected tests (or all enabled if names is None) and write the report."""
+    lang = lang or cfg.output_lang
     all_cases = {tc.name: tc for tc in load_tests()}
     if names is None:
         selected = [tc for tc in all_cases.values() if tc.enabled]
@@ -336,16 +352,17 @@ async def run_suite(
             if on_event:
                 on_event({"type": "step", "index": _i, "step": k})
 
-        entry = await run_test(tc, cfg, on_step=_step)
+        entry = await run_test(tc, cfg, on_step=_step, lang=lang)
         entries.append(entry)
         if on_event:
             on_event({"type": "end", "index": i, "passed": entry.passed,
                       "summary": entry.summary})
 
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    title = REPORT_TITLES.get(lang, REPORT_TITLES["th"])
     path = render_report(
         entries, cfg.report_path, generated_at=generated_at,
-        title=f"AI Web Tester — Report ({cfg.viewport_width}x{cfg.viewport_height})",
+        title=f"{title} ({cfg.viewport_width}x{cfg.viewport_height})", lang=lang,
     )
     return entries, path
 

@@ -5,6 +5,8 @@ For non-technical users: double-click the launcher (or run `python app.py`). A
 page opens in your browser where you can create test cases in plain English, run
 them, watch progress, and view the screenshot report — no terminal needed.
 
+The UI is bilingual (ไทย / English) with a switcher; it defaults to Thai.
+
 Runs only on 127.0.0.1 (your machine). Your API key is stored locally in .env and
 is never shown back in the UI or exposed on the network.
 """
@@ -12,6 +14,7 @@ is never shown back in the UI or exposed on the network.
 from __future__ import annotations
 
 import asyncio
+import json
 import socket
 import threading
 import uuid
@@ -118,7 +121,7 @@ async def api_delete_test(request: Request):
 # Run API
 # --------------------------------------------------------------------------- #
 
-async def _execute(names: list[str], headless: bool):
+async def _execute(names: list[str], headless: bool, lang: str):
     global RUN
     cfg = with_headless(load_config(), headless)
 
@@ -136,7 +139,7 @@ async def _execute(names: list[str], headless: bool):
             RUN["tests"][i]["summary"] = ev["summary"]
 
     try:
-        await run_suite(names, cfg, on_event=on_event)
+        await run_suite(names, cfg, on_event=on_event, lang=lang)
         if RUN is not None:
             RUN["status"] = "done"
             RUN["report_ready"] = True
@@ -157,6 +160,7 @@ async def api_run(request: Request):
 
     data = await request.json()
     headless = bool(data.get("headless", True))
+    lang = data.get("lang") or "th"
     requested = data.get("names")
 
     cases = load_tests()
@@ -178,7 +182,7 @@ async def api_run(request: Request):
             for c in selected
         ],
     }
-    _RUN_TASK = asyncio.create_task(_execute([c.name for c in selected], headless))
+    _RUN_TASK = asyncio.create_task(_execute([c.name for c in selected], headless, lang))
     return JSONResponse({"run_id": run_id}, status_code=202)
 
 
@@ -218,7 +222,6 @@ async def api_get_settings(request: Request):
 async def api_set_settings(request: Request):
     data = await request.json()
     Path(ENV_PATH).touch(exist_ok=True)
-    # Secret/write-only fields: only update when a non-empty value is provided.
     write_only = {"google_api_key", "login_url"}
     for field, env_var in SETTING_KEYS.items():
         if field not in data:
@@ -231,6 +234,172 @@ async def api_set_settings(request: Request):
 
 
 # --------------------------------------------------------------------------- #
+# Translations (injected into both pages as JSON)
+# --------------------------------------------------------------------------- #
+
+I18N = {
+    "en": {
+        "doc_title": "AI Web Tester",
+        "setup_doc_title": "Setup — AI Web Tester",
+        "settings": "⚙ Settings",
+        "run_selected": "▶ Run selected",
+        "run_all": "▶ Run all",
+        "show_browser": "Show browser window",
+        "new_test": "＋ New test",
+        "report": "Report",
+        "open_new_tab": "Open in new tab ↗",
+        "no_tests": 'No tests yet. Click "＋ New test".',
+        "enabled": "enabled",
+        "disabled": "disabled",
+        "run": "▶ Run",
+        "edit": "Edit",
+        "new_test_title": "New test",
+        "edit_prefix": "Edit: ",
+        "name_label": "Name (id — lowercase, no spaces)",
+        "name_ph": "e.g. signup_form",
+        "title_label": "Title (shown in the list)",
+        "title_ph": "e.g. Sign-up form appears",
+        "desc_label": "What should the test do? (plain language)",
+        "desc_ph": "Click the 'Sign up' button and confirm a form with email and password fields appears.",
+        "desc_hint": "You don't need to mention opening the site — it navigates there automatically.",
+        "start_label": "Start URL (optional — overrides the default site URL)",
+        "start_ph": "leave blank to use the site's Base URL",
+        "incl_runall": 'Include in "Run all"',
+        "start_login": "Start at Login URL first",
+        "max_steps": "Max steps",
+        "cancel": "Cancel",
+        "save": "Save",
+        "err_desc": "Please describe what the test should do.",
+        "err_save": "Could not save.",
+        "confirm_delete": 'Delete test "{name}"?',
+        "settings_title": "Settings",
+        "s_key_label": "Gemini API key",
+        "set_yes": "(set ✓)",
+        "set_no": "(not set)",
+        "keep_current": "Leave blank to keep current",
+        "base_label": "Base URL (the site you want to test)",
+        "base_ph": "https://your-site.com",
+        "login_label": "Login URL (optional — for tests with \"Start at Login URL\")",
+        "model_label": "Model",
+        "hint_label": "Context hint (optional — extra instructions for every test)",
+        "hint_ph": "e.g. This is a mobile site. Dismiss any cookie banner first.",
+        "vw_label": "Viewport width",
+        "vh_label": "Viewport height",
+        "ds_label": "Device scale",
+        "ua_label": "User agent (optional)",
+        "ua_ph": "browser default",
+        "close": "Close",
+        "waiting": "Waiting",
+        "running_step": "Running… step {step}/{max}",
+        "passed_word": "Passed",
+        "failed_word": "Failed",
+        "head_running": "⏳ Running tests…",
+        "head_done": "✅ Done",
+        "head_error": "⚠️ Error",
+        "alert_select": "Select at least one test.",
+        "alert_busy": "A run is already in progress.",
+        "alert_run_err": "Run error: ",
+        "welcome": "👋 Welcome — one-time setup",
+        "welcome_p1": "To run tests, enter your own <b>Google Gemini API key</b>. It's stored only on this computer and is never shared.",
+        "welcome_p2": 'Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>.',
+        "key_ph": "Paste your Gemini API key here",
+        "save_continue": "Save and continue",
+        "err_paste": "Please paste a key.",
+        "err_savekey": "Could not save the key.",
+    },
+    "th": {
+        "doc_title": "AI Web Tester",
+        "setup_doc_title": "ตั้งค่า — AI Web Tester",
+        "settings": "⚙ ตั้งค่า",
+        "run_selected": "▶ รันที่เลือก",
+        "run_all": "▶ รันทั้งหมด",
+        "show_browser": "แสดงหน้าต่างเบราว์เซอร์",
+        "new_test": "＋ สร้างเทสต์ใหม่",
+        "report": "รายงานผล",
+        "open_new_tab": "เปิดในแท็บใหม่ ↗",
+        "no_tests": 'ยังไม่มีเทสต์ คลิก "＋ สร้างเทสต์ใหม่"',
+        "enabled": "เปิดใช้งาน",
+        "disabled": "ปิดใช้งาน",
+        "run": "▶ รัน",
+        "edit": "แก้ไข",
+        "new_test_title": "สร้างเทสต์ใหม่",
+        "edit_prefix": "แก้ไข: ",
+        "name_label": "ชื่อ (id — ตัวพิมพ์เล็ก ห้ามเว้นวรรค)",
+        "name_ph": "เช่น signup_form",
+        "title_label": "ชื่อที่แสดง (แสดงในรายการ)",
+        "title_ph": "เช่น ฟอร์มสมัครสมาชิกปรากฏขึ้น",
+        "desc_label": "ต้องการให้เทสต์ทำอะไร? (อธิบายเป็นภาษาธรรมดา)",
+        "desc_ph": "คลิกปุ่ม 'สมัครสมาชิก' และตรวจสอบว่ามีฟอร์มที่มีช่องอีเมลและรหัสผ่านปรากฏขึ้น",
+        "desc_hint": "ไม่ต้องระบุการเปิดเว็บไซต์ — ระบบจะเปิดให้อัตโนมัติ",
+        "start_label": "Start URL (ไม่บังคับ — ใช้แทน URL เริ่มต้นของเว็บไซต์)",
+        "start_ph": "เว้นว่างไว้เพื่อใช้ Base URL ของเว็บไซต์",
+        "incl_runall": 'รวมใน "รันทั้งหมด"',
+        "start_login": "เริ่มที่ Login URL ก่อน",
+        "max_steps": "จำนวนขั้นตอนสูงสุด",
+        "cancel": "ยกเลิก",
+        "save": "บันทึก",
+        "err_desc": "กรุณาอธิบายว่าต้องการให้เทสต์ทำอะไร",
+        "err_save": "ไม่สามารถบันทึกได้",
+        "confirm_delete": 'ลบเทสต์ "{name}" ใช่หรือไม่?',
+        "settings_title": "ตั้งค่า",
+        "s_key_label": "Gemini API key",
+        "set_yes": "(ตั้งค่าแล้ว ✓)",
+        "set_no": "(ยังไม่ได้ตั้งค่า)",
+        "keep_current": "เว้นว่างไว้เพื่อใช้ค่าเดิม",
+        "base_label": "Base URL (เว็บไซต์ที่ต้องการทดสอบ)",
+        "base_ph": "https://your-site.com",
+        "login_label": "Login URL (ไม่บังคับ — สำหรับเทสต์ที่ตั้ง \"เริ่มที่ Login URL\")",
+        "model_label": "โมเดล",
+        "hint_label": "คำแนะนำเพิ่มเติม (ไม่บังคับ — คำสั่งที่ใช้กับทุกเทสต์)",
+        "hint_ph": "เช่น นี่คือเว็บไซต์สำหรับมือถือ ปิดแบนเนอร์คุกกี้ก่อน",
+        "vw_label": "ความกว้างหน้าจอ",
+        "vh_label": "ความสูงหน้าจอ",
+        "ds_label": "อัตราส่วนหน้าจอ (Device scale)",
+        "ua_label": "User agent (ไม่บังคับ)",
+        "ua_ph": "ค่าเริ่มต้นของเบราว์เซอร์",
+        "close": "ปิด",
+        "waiting": "รอ",
+        "running_step": "กำลังรัน… ขั้นตอนที่ {step}/{max}",
+        "passed_word": "ผ่าน",
+        "failed_word": "ไม่ผ่าน",
+        "head_running": "⏳ กำลังรันการทดสอบ…",
+        "head_done": "✅ เสร็จสิ้น",
+        "head_error": "⚠️ เกิดข้อผิดพลาด",
+        "alert_select": "กรุณาเลือกอย่างน้อยหนึ่งเทสต์",
+        "alert_busy": "มีการรันอยู่แล้ว กรุณารอให้เสร็จก่อน",
+        "alert_run_err": "เกิดข้อผิดพลาดในการรัน: ",
+        "welcome": "👋 ยินดีต้อนรับ — ตั้งค่าครั้งแรก",
+        "welcome_p1": "หากต้องการรันการทดสอบ กรุณาใส่ <b>Google Gemini API key</b> ของคุณเอง คีย์นี้จะถูกเก็บไว้ในเครื่องนี้เท่านั้นและจะไม่ถูกแชร์",
+        "welcome_p2": 'รับคีย์ฟรีได้ที่ <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>',
+        "key_ph": "วาง Gemini API key ของคุณที่นี่",
+        "save_continue": "บันทึกและดำเนินการต่อ",
+        "err_paste": "กรุณาวางคีย์ก่อน",
+        "err_savekey": "ไม่สามารถบันทึกคีย์ได้",
+    },
+}
+
+_I18N_JS = "const I18N = " + json.dumps(I18N, ensure_ascii=False) + ";"
+
+_LANG_BOOT = """
+let LANG = localStorage.getItem('lang') || 'th';
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k; }
+function applyI18n(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{ el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll('.langsw button').forEach(b=>b.classList.toggle('active', b.dataset.lang===LANG));
+}
+"""
+
+_LANG_SWITCH_HTML = """
+<div class="langsw">
+  <button data-lang="th" onclick="setLang('th')">ไทย</button>
+  <button data-lang="en" onclick="setLang('en')">EN</button>
+</div>"""
+
+
+# --------------------------------------------------------------------------- #
 # Pages
 # --------------------------------------------------------------------------- #
 
@@ -240,9 +409,9 @@ async def index(request: Request):
     return HTMLResponse(INDEX_HTML)
 
 
-KEY_HTML = """<!doctype html><html><head><meta charset="utf-8">
+KEY_HTML = ("""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Setup — AI Web Tester</title>
+<title data-i18n="setup_doc_title">Setup — AI Web Tester</title>
 <style>
   body{font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;background:#0f1115;color:#e6e8ec;
        display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
@@ -253,33 +422,40 @@ KEY_HTML = """<!doctype html><html><head><meta charset="utf-8">
   button{background:#5b9dff;color:#06101f;border:0;border-radius:8px;padding:10px 18px;
        font-weight:700;cursor:pointer;font-size:14px}
   .err{color:#ff5c5c;min-height:18px}
+  .langsw{display:flex;gap:4px;justify-content:flex-end;margin-bottom:8px}
+  .langsw button{background:transparent;border:1px solid #262b36;color:#e6e8ec;padding:4px 10px;font-size:12px;font-weight:400}
+  .langsw button.active{background:#5b9dff;color:#06101f;border:0;font-weight:700}
 </style></head><body>
 <div class="card">
-  <h1>👋 Welcome — one-time setup</h1>
-  <p>To run tests, enter your own <b>Google Gemini API key</b>. It's stored only on
-     this computer (in a local file) and is never shared.</p>
-  <p>Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>.</p>
-  <input id="key" type="password" placeholder="Paste your Gemini API key here" autocomplete="off">
+  """ + _LANG_SWITCH_HTML + """
+  <h1 data-i18n="welcome">Welcome</h1>
+  <p data-i18n-html="welcome_p1"></p>
+  <p data-i18n-html="welcome_p2"></p>
+  <input id="key" type="password" data-i18n-ph="key_ph" autocomplete="off">
   <div class="err" id="err"></div>
-  <button onclick="save()">Save and continue</button>
+  <button data-i18n="save_continue" onclick="save()">Save and continue</button>
 </div>
 <script>
+/*__I18N__*/
+""" + _LANG_BOOT + """
+function setLang(l){ LANG=l; localStorage.setItem('lang',l); applyI18n(); }
 async function save(){
   const key=document.getElementById('key').value.trim();
   const err=document.getElementById('err'); err.textContent='';
-  if(!key){err.textContent='Please paste a key.';return;}
+  if(!key){err.textContent=t('err_paste');return;}
   const r=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({google_api_key:key})});
   const d=await r.json();
-  if(d.has_api_key){location.reload();}else{err.textContent='Could not save the key.';}
+  if(d.has_api_key){location.reload();}else{err.textContent=t('err_savekey');}
 }
 document.getElementById('key').addEventListener('keydown',e=>{if(e.key==='Enter')save();});
-</script></body></html>"""
+applyI18n();
+</script></body></html>""").replace("/*__I18N__*/", _I18N_JS)
 
 
-INDEX_HTML = """<!doctype html><html><head><meta charset="utf-8">
+INDEX_HTML = ("""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Web Tester</title>
+<title data-i18n="doc_title">AI Web Tester</title>
 <style>
 :root{--bg:#0f1115;--card:#171a21;--line:#262b36;--txt:#e6e8ec;--mut:#9aa3b2;
       --pass:#2ecc71;--fail:#ff5c5c;--accent:#5b9dff;--run:#f5a623}
@@ -292,6 +468,9 @@ button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line
 button.primary{background:var(--accent);color:#06101f;border:0;font-weight:700}
 button.ghost{background:transparent}
 button:disabled{opacity:.5;cursor:not-allowed}
+.langsw{display:flex;gap:4px}
+.langsw button{padding:5px 10px;font-size:12px}
+.langsw button.active{background:var(--accent);color:#06101f;border:0;font-weight:700}
 main{padding:20px 24px;max-width:1100px;margin:0 auto}
 .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
 .toolbar .spacer{flex:1}
@@ -303,20 +482,18 @@ main{padding:20px 24px;max-width:1100px;margin:0 auto}
 .row-actions{display:flex;gap:6px}
 .pill{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line)}
 .muted{color:var(--mut)}
-/* modal */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
 .overlay.show{display:flex}
 .modal{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;width:560px;max-width:100%;max-height:90vh;overflow:auto}
 .modal h2{margin:0 0 12px;font-size:16px}
-label{display:block;margin:10px 0 4px;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+label{display:block;margin:10px 0 4px;color:var(--mut);font-size:12px}
 input[type=text],input[type=number],input[type=password],textarea,select{width:100%;padding:9px;border-radius:8px;
   border:1px solid var(--line);background:#11141a;color:var(--txt);font-size:14px;font-family:inherit}
 textarea{min-height:120px;resize:vertical}
 .checks{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
-.checks label{display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;color:var(--txt);font-size:13px;margin:0}
+.checks label{display:flex;gap:6px;align-items:center;color:var(--txt);font-size:13px;margin:0}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
 .err{color:var(--fail);min-height:18px;font-size:13px}
-/* progress */
 #progress{display:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
 #progress.show{display:block}
 .prow{display:flex;align-items:center;gap:10px;padding:6px 0}
@@ -332,105 +509,106 @@ iframe{width:100%;height:78vh;border:1px solid var(--line);border-radius:10px;ba
 </style></head><body>
 <header>
   <h1>🌐 AI Web Tester</h1>
-  <button class="ghost" onclick="openSettings()">⚙ Settings</button>
+  """ + _LANG_SWITCH_HTML + """
+  <button class="ghost" data-i18n="settings" onclick="openSettings()">Settings</button>
 </header>
 <main>
   <div class="toolbar">
-    <button class="primary" id="runSel" onclick="run('selected')">▶ Run selected</button>
-    <button onclick="run('all')">▶ Run all</button>
-    <label class="checks" style="margin:0"><input type="checkbox" id="showBrowser"> Show browser window</label>
+    <button class="primary" data-i18n="run_selected" onclick="run('selected')">Run selected</button>
+    <button data-i18n="run_all" onclick="run('all')">Run all</button>
+    <label class="checks" style="margin:0"><input type="checkbox" id="showBrowser"> <span data-i18n="show_browser">Show browser window</span></label>
     <span class="spacer"></span>
-    <button onclick="openNew()">＋ New test</button>
+    <button data-i18n="new_test" onclick="openNew()">New test</button>
   </div>
 
   <div id="progress"></div>
   <div id="reportWrap" style="display:none">
-    <div class="toolbar"><b>Report</b><span class="spacer"></span>
-      <a href="/report" target="_blank"><button class="ghost">Open in new tab ↗</button></a></div>
+    <div class="toolbar"><b data-i18n="report">Report</b><span class="spacer"></span>
+      <a href="/report" target="_blank"><button class="ghost" data-i18n="open_new_tab">Open in new tab</button></a></div>
     <iframe id="report" src="about:blank"></iframe>
   </div>
 
   <div id="list"></div>
 </main>
 
-<!-- Test editor modal -->
 <div class="overlay" id="editOverlay">
   <div class="modal">
     <h2 id="editTitle">New test</h2>
-    <label>Name (id — lowercase, no spaces)</label>
-    <input type="text" id="f_name" placeholder="e.g. signup_form">
-    <label>Title (shown in the list)</label>
-    <input type="text" id="f_title" placeholder="e.g. Sign-up form appears">
-    <label>What should the test do? (plain English)</label>
-    <textarea id="f_desc" placeholder="Click the 'Sign up' button and confirm a form with email and password fields appears."></textarea>
-    <div class="hint">You don't need to mention opening the site — it navigates there automatically.</div>
-    <label>Start URL (optional — overrides the default site URL)</label>
-    <input type="text" id="f_start" placeholder="leave blank to use the site's Base URL">
+    <label data-i18n="name_label">Name</label>
+    <input type="text" id="f_name" data-i18n-ph="name_ph">
+    <label data-i18n="title_label">Title</label>
+    <input type="text" id="f_title" data-i18n-ph="title_ph">
+    <label data-i18n="desc_label">What should the test do?</label>
+    <textarea id="f_desc" data-i18n-ph="desc_ph"></textarea>
+    <div class="hint" data-i18n="desc_hint"></div>
+    <label data-i18n="start_label">Start URL</label>
+    <input type="text" id="f_start" data-i18n-ph="start_ph">
     <div class="checks">
-      <label><input type="checkbox" id="f_enabled" checked> Include in "Run all"</label>
-      <label><input type="checkbox" id="f_login"> Start at Login URL first</label>
+      <label><input type="checkbox" id="f_enabled" checked> <span data-i18n="incl_runall">Include in Run all</span></label>
+      <label><input type="checkbox" id="f_login"> <span data-i18n="start_login">Start at Login URL first</span></label>
     </div>
-    <label>Max steps</label>
+    <label data-i18n="max_steps">Max steps</label>
     <input type="number" id="f_steps" value="20" min="1" max="100" style="width:120px">
     <div class="err" id="editErr"></div>
     <div class="modal-actions">
-      <button onclick="closeModal('editOverlay')">Cancel</button>
-      <button class="primary" id="saveBtn" onclick="saveTest()">Save</button>
+      <button data-i18n="cancel" onclick="closeModal('editOverlay')">Cancel</button>
+      <button class="primary" id="saveBtn" data-i18n="save" onclick="saveTest()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- Settings modal -->
 <div class="overlay" id="setOverlay">
   <div class="modal">
-    <h2>Settings</h2>
-    <label>Gemini API key <span class="muted" id="keyState"></span></label>
-    <input type="password" id="s_key" placeholder="Leave blank to keep current" autocomplete="off">
-    <label>Base URL (the site you want to test)</label>
-    <input type="text" id="s_base" placeholder="https://your-site.com">
-    <label>Login URL <span class="muted" id="loginState"></span> (optional — used by tests with "Start at Login URL")</label>
-    <input type="password" id="s_login" placeholder="Leave blank to keep current">
-    <label>Model</label>
-    <select id="s_model">
-      <option>gemini-2.5-flash</option>
-      <option>gemini-2.5-pro</option>
-    </select>
-    <label>Context hint (optional — extra standing instructions for every test)</label>
-    <textarea id="s_hint" style="min-height:60px" placeholder="e.g. This is a mobile site. Dismiss any cookie banner first."></textarea>
+    <h2 data-i18n="settings_title">Settings</h2>
+    <label><span data-i18n="s_key_label">Gemini API key</span> <span class="muted" id="keyState"></span></label>
+    <input type="password" id="s_key" data-i18n-ph="keep_current" autocomplete="off">
+    <label data-i18n="base_label">Base URL</label>
+    <input type="text" id="s_base" data-i18n-ph="base_ph">
+    <label><span data-i18n="login_label">Login URL</span> <span class="muted" id="loginState"></span></label>
+    <input type="password" id="s_login" data-i18n-ph="keep_current">
+    <label data-i18n="model_label">Model</label>
+    <select id="s_model"><option>gemini-2.5-flash</option><option>gemini-2.5-pro</option></select>
+    <label data-i18n="hint_label">Context hint</label>
+    <textarea id="s_hint" style="min-height:60px" data-i18n-ph="hint_ph"></textarea>
     <div class="two">
-      <div><label>Viewport width</label><input type="number" id="s_vw"></div>
-      <div><label>Viewport height</label><input type="number" id="s_vh"></div>
+      <div><label data-i18n="vw_label">Viewport width</label><input type="number" id="s_vw"></div>
+      <div><label data-i18n="vh_label">Viewport height</label><input type="number" id="s_vh"></div>
     </div>
     <div class="two">
-      <div><label>Device scale</label><input type="number" id="s_ds" step="0.5"></div>
-      <div><label>User agent (optional)</label><input type="text" id="s_ua" placeholder="browser default"></div>
+      <div><label data-i18n="ds_label">Device scale</label><input type="number" id="s_ds" step="0.5"></div>
+      <div><label data-i18n="ua_label">User agent</label><input type="text" id="s_ua" data-i18n-ph="ua_ph"></div>
     </div>
     <div class="err" id="setErr"></div>
     <div class="modal-actions">
-      <button onclick="closeModal('setOverlay')">Close</button>
-      <button class="primary" onclick="saveSettings()">Save</button>
+      <button data-i18n="close" onclick="closeModal('setOverlay')">Close</button>
+      <button class="primary" data-i18n="save" onclick="saveSettings()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-let TESTS=[], POLL=null, EDIT_NAME=null;
+/*__I18N__*/
+""" + _LANG_BOOT + """
+let TESTS=[], POLL=null, EDIT_NAME=null, LAST_STATUS=null;
+
+function setLang(l){ LANG=l; localStorage.setItem('lang',l); applyI18n(); loadTests();
+  if(LAST_STATUS) renderProgress(LAST_STATUS); }
 
 async function loadTests(){
   TESTS = await (await fetch('/api/tests')).json();
   const list=document.getElementById('list');
-  if(!TESTS.length){list.innerHTML='<p class="muted">No tests yet. Click “＋ New test”.</p>';return;}
-  list.innerHTML = TESTS.map(t=>`
+  if(!TESTS.length){list.innerHTML='<p class="muted">'+esc(t('no_tests'))+'</p>';return;}
+  list.innerHTML = TESTS.map(t_=>`
     <div class="test">
-      <input type="checkbox" class="sel" data-name="${t.name}" ${t.enabled?'checked':''}>
+      <input type="checkbox" class="sel" data-name="${t_.name}" ${t_.enabled?'checked':''}>
       <div class="grow">
-        <div class="title">${esc(t.title)} <span class="pill">${t.enabled?'enabled':'disabled'}</span></div>
-        <div class="desc">${esc(t.description)}</div>
+        <div class="title">${esc(t_.title)} <span class="pill">${t_.enabled?t('enabled'):t('disabled')}</span></div>
+        <div class="desc">${esc(t_.description)}</div>
       </div>
       <div class="row-actions">
-        <button onclick="run('one','${t.name}')">▶ Run</button>
-        <button class="ghost" onclick="openEdit('${t.name}')">Edit</button>
-        <button class="ghost" onclick="delTest('${t.name}')">🗑</button>
+        <button onclick="run('one','${t_.name}')">${t('run')}</button>
+        <button class="ghost" onclick="openEdit('${t_.name}')">${t('edit')}</button>
+        <button class="ghost" onclick="delTest('${t_.name}')">🗑</button>
       </div>
     </div>`).join('');
 }
@@ -440,11 +618,11 @@ function selectedNames(){return [...document.querySelectorAll('.sel:checked')].m
 async function run(mode,one){
   let names=null;
   if(mode==='one') names=[one];
-  else if(mode==='selected'){names=selectedNames(); if(!names.length){alert('Select at least one test.');return;}}
+  else if(mode==='selected'){names=selectedNames(); if(!names.length){alert(t('alert_select'));return;}}
   const headless=!document.getElementById('showBrowser').checked;
   const r=await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({names,headless})});
-  if(r.status===409){alert('A run is already in progress.');return;}
+    body:JSON.stringify({names,headless,lang:LANG})});
+  if(r.status===409){alert(t('alert_busy'));return;}
   const d=await r.json();
   if(d.error){alert(d.error);return;}
   document.getElementById('reportWrap').style.display='none';
@@ -452,42 +630,42 @@ async function run(mode,one){
 }
 
 function startPolling(){
-  const p=document.getElementById('progress'); p.classList.add('show');
+  document.getElementById('progress').classList.add('show');
   if(POLL) clearInterval(POLL);
   POLL=setInterval(pollStatus,1200); pollStatus();
 }
 async function pollStatus(){
   const s=await (await fetch('/api/run/status')).json();
   if(s.status==='idle'){return;}
-  renderProgress(s);
+  LAST_STATUS=s; renderProgress(s);
   if(s.status==='done'||s.status==='error'){
     clearInterval(POLL); POLL=null;
     if(s.report_ready){
-      const w=document.getElementById('reportWrap'); w.style.display='block';
+      document.getElementById('reportWrap').style.display='block';
       document.getElementById('report').src='/report?ts='+Date.now();
     }
-    if(s.status==='error') alert('Run error: '+(s.error||'unknown'));
+    if(s.status==='error') alert(t('alert_run_err')+(s.error||''));
   }
 }
 function renderProgress(s){
-  const rows=s.tests.map(t=>{
-    const pct=t.max_steps? Math.min(100, Math.round(100*t.step/t.max_steps)):0;
-    const label={pending:'Waiting',running:'Running… step '+t.step+'/'+t.max_steps,
-                 pass:'✅ '+esc(t.summary||'Passed'),fail:'❌ '+esc(t.summary||'Failed')}[t.status];
-    return `<div class="prow"><span class="dot ${t.status}"></span>
-       <b style="min-width:160px">${esc(t.name)}</b>
-       <div class="bar"><i style="width:${t.status==='pass'||t.status==='fail'?100:pct}%"></i></div>
+  const rows=s.tests.map(x=>{
+    const pct=x.max_steps? Math.min(100, Math.round(100*x.step/x.max_steps)):0;
+    const label={pending:t('waiting'),
+                 running:t('running_step').replace('{step}',x.step).replace('{max}',x.max_steps),
+                 pass:'✅ '+esc(x.summary||t('passed_word')),
+                 fail:'❌ '+esc(x.summary||t('failed_word'))}[x.status];
+    return `<div class="prow"><span class="dot ${x.status}"></span>
+       <b style="min-width:160px">${esc(x.name)}</b>
+       <div class="bar"><i style="width:${x.status==='pass'||x.status==='fail'?100:pct}%"></i></div>
        <span class="muted">${label}</span></div>`;
   }).join('');
-  const head = s.status==='running'? '⏳ Running tests…' :
-               s.status==='done'? '✅ Done' : '⚠️ Error';
+  const head = s.status==='running'? t('head_running') : s.status==='done'? t('head_done') : t('head_error');
   document.getElementById('progress').innerHTML='<b>'+head+'</b>'+rows;
 }
 
-/* ---- test editor ---- */
 function openNew(){
   EDIT_NAME=null;
-  document.getElementById('editTitle').textContent='New test';
+  document.getElementById('editTitle').textContent=t('new_test_title');
   document.getElementById('f_name').disabled=false;
   set('f_name','');set('f_title','');set('f_desc','');set('f_start','');setNum('f_steps',20);
   check('f_enabled',true);check('f_login',false);
@@ -495,12 +673,12 @@ function openNew(){
   show('editOverlay');
 }
 function openEdit(name){
-  const t=TESTS.find(x=>x.name===name); if(!t)return;
+  const x=TESTS.find(z=>z.name===name); if(!x)return;
   EDIT_NAME=name;
-  document.getElementById('editTitle').textContent='Edit: '+t.title;
+  document.getElementById('editTitle').textContent=t('edit_prefix')+x.title;
   document.getElementById('f_name').disabled=true;
-  set('f_name',t.name);set('f_title',t.title);set('f_desc',t.description);set('f_start',t.start_url);setNum('f_steps',t.max_steps);
-  check('f_enabled',t.enabled);check('f_login',t.requires_login);
+  set('f_name',x.name);set('f_title',x.title);set('f_desc',x.description);set('f_start',x.start_url);setNum('f_steps',x.max_steps);
+  check('f_enabled',x.enabled);check('f_login',x.requires_login);
   document.getElementById('editErr').textContent='';
   show('editOverlay');
 }
@@ -509,24 +687,23 @@ async function saveTest(){
     start_url:val('f_start'),enabled:chk('f_enabled'),requires_login:chk('f_login'),
     max_steps:parseInt(val('f_steps')||'20',10)};
   const err=document.getElementById('editErr'); err.textContent='';
-  if(!payload.description.trim()){err.textContent='Please describe what the test should do.';return;}
+  if(!payload.description.trim()){err.textContent=t('err_desc');return;}
   let r;
   if(EDIT_NAME){r=await fetch('/api/tests/'+EDIT_NAME,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
   else{r=await fetch('/api/tests',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}
   const d=await r.json();
-  if(!r.ok){err.textContent=d.error||'Could not save.';return;}
+  if(!r.ok){err.textContent=d.error||t('err_save');return;}
   closeModal('editOverlay'); loadTests();
 }
 async function delTest(name){
-  if(!confirm('Delete test "'+name+'"?'))return;
+  if(!confirm(t('confirm_delete').replace('{name}',name)))return;
   await fetch('/api/tests/'+name,{method:'DELETE'}); loadTests();
 }
 
-/* ---- settings ---- */
 async function openSettings(){
   const s=await (await fetch('/api/settings')).json();
-  document.getElementById('keyState').textContent=s.has_api_key?'(set ✓)':'(not set)';
-  document.getElementById('loginState').textContent=s.has_login_url?'(set ✓)':'';
+  document.getElementById('keyState').textContent=s.has_api_key?t('set_yes'):t('set_no');
+  document.getElementById('loginState').textContent=s.has_login_url?t('set_yes'):'';
   set('s_key','');set('s_login','');
   set('s_base',s.base_url);set('s_hint',s.context_hint);set('s_ua',s.user_agent);
   document.getElementById('s_model').value=s.llm_model;
@@ -540,11 +717,10 @@ async function saveSettings(){
   if(val('s_key').trim()) payload.google_api_key=val('s_key').trim();
   if(val('s_login').trim()) payload.login_url=val('s_login').trim();
   const r=await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  if(!r.ok){document.getElementById('setErr').textContent='Could not save.';return;}
+  if(!r.ok){document.getElementById('setErr').textContent=t('err_save');return;}
   closeModal('setOverlay');
 }
 
-/* helpers */
 function show(id){document.getElementById(id).classList.add('show');}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function val(id){return document.getElementById(id).value;}
@@ -553,9 +729,10 @@ function setNum(id,v){document.getElementById(id).value=v;}
 function chk(id){return document.getElementById(id).checked;}
 function check(id,v){document.getElementById(id).checked=!!v;}
 
+applyI18n();
 loadTests();
 pollStatus();
-</script></body></html>"""
+</script></body></html>""").replace("/*__I18N__*/", _I18N_JS)
 
 
 # --------------------------------------------------------------------------- #
