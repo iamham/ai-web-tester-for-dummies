@@ -1,5 +1,5 @@
 """
-Local web UI for the AI Web Tester.
+Local web UI for the AI Web Tester for Dummies.
 
 For non-technical users: double-click the launcher (or run `python app.py`). A
 page opens in your browser with a guided, plain-language interface to create
@@ -249,8 +249,8 @@ async def api_set_settings(request: Request):
 
 I18N = {
     "en": {
-        "doc_title": "AI Web Tester",
-        "setup_doc_title": "Setup — AI Web Tester",
+        "doc_title": "AI Web Tester for Dummies",
+        "setup_doc_title": "Setup — AI Web Tester for Dummies",
         # chrome
         "settings": "⚙ Settings",
         "about": "ℹ️ About",
@@ -349,14 +349,14 @@ I18N = {
         # about
         "about_title": "About this tool",
         "about_made": "Created with ❤️ by Sarun Peetasai",
-        "about_cause": "AI Web Tester is free and open source. It was built to make web testing accessible to everyone — including non-developers and teams who prefer working in Thai — so anyone can check that a website works just by describing it in plain words.",
+        "about_cause": "AI Web Tester for Dummies is free and open source. It was built to make web testing accessible to everyone — including non-developers and teams who prefer working in Thai — so anyone can check that a website works just by describing it in plain words.",
         "about_contribute": "Contributions are very welcome — ⭐ star the repo, report a problem, or open a pull request on GitHub. Every bit helps the project grow.",
         "about_repo": "⭐ Source & contribute",
         "about_profile": "👤 GitHub",
         "about_site": "🌐 sarunp.com",
         # wizard
         "wiz_step": "Step {n} of 3",
-        "wiz_welcome_title": "👋 Welcome to AI Web Tester",
+        "wiz_welcome_title": "👋 Welcome to AI Web Tester for Dummies",
         "wiz_welcome_body": "Check your website in plain language. Let's set up in 3 quick steps.",
         "wiz_key_title": "Your Gemini API key",
         "wiz_key_body": "We use Google Gemini (the AI) to read and click your site. Paste a free key — it's stored only on this computer.",
@@ -383,41 +383,41 @@ I18N = {
         "tpl_mobile_desc": "Check the page has no horizontal scrolling, no overlapping elements, and no broken images.",
     },
     "th": {
-        "doc_title": "AI Web Tester",
-        "setup_doc_title": "ตั้งค่า — AI Web Tester",
+        "doc_title": "AI Web Tester for Dummies",
+        "setup_doc_title": "ตั้งค่า — AI Web Tester for Dummies",
         "settings": "⚙ ตั้งค่า",
         "about": "ℹ️ เกี่ยวกับ",
         "testing_label": "กำลังทดสอบ",
         "set_site_nudge": "ตั้งค่าเว็บไซต์ของคุณ",
-        "run_all": "▶ รันทั้งหมด",
+        "run_all": "▶ เริ่มทั้งหมด",
         "stop": "■ หยุด",
         "stopping": "กำลังหยุด…",
-        "new_check": "＋ สร้างการตรวจสอบ",
+        "new_check": "＋ สร้างเทสใหม่",
         "show_browser": "แสดงเบราว์เซอร์",
         "how_title": "วิธีใช้งาน",
-        "how_1": "เขียนสิ่งที่ต้องการตรวจสอบเป็นคำพูดธรรมดา",
-        "how_2": "กดปุ่มรัน",
+        "how_1": "เขียนสิ่งที่ต้องการตรวจสอบเป็นคำพูด (Natural Language)",
+        "how_2": "กดปุ่มเริ่ม",
         "how_3": "อ่านรายงานพร้อมภาพหน้าจอ",
         "how_dismiss": "เข้าใจแล้ว",
         "report": "รายงานผล",
         "open_new_tab": "เปิดในแท็บใหม่ ↗",
         "results_help_title": "ผลลัพธ์หมายความว่าอย่างไร?",
-        "results_help_body": "<b>✅ ผ่าน</b> — ทุกอย่างที่คุณอธิบายเป็นจริง <b>❌ ไม่ผ่าน</b> — มีบางอย่างไม่เกิดขึ้นตามที่อธิบาย หรือหน้าเว็บแสดงข้อผิดพลาด รายงานจะแสดงภาพหน้าจอแต่ละขั้นตอนที่ AI เห็นและทำ — คลิกที่แถวเพื่อดูรายละเอียด",
+        "results_help_body": "<b>✅ ผ่าน</b> — ทดสอบแล้วและ Test Case ผ่านทั้งหมด<b>❌ ไม่ผ่าน</b> — มีบางอย่างไม่เกิดขึ้นตามที่อธิบาย หรือหน้าเว็บแสดงข้อผิดพลาด รายงานจะแสดงภาพหน้าจอแต่ละขั้นตอนที่ AI เห็นและทำ, คลิกที่แถวเพื่อดูรายละเอียด",
         "no_checks_title": "ยังไม่มีการตรวจสอบ",
-        "start_example": "เริ่มจากตัวอย่างสำเร็จรูป:",
-        "write_own": "＋ เขียนเอง",
-        "run": "▶ รัน",
+        "start_example": "เริ่มทดสอบจาก Test Case ตัวอย่าง:",
+        "write_own": "＋ เขียน Test Case ของคุณเอง",
+        "run": "▶ เริ่มทดสอบ",
         "edit": "แก้ไข",
         "chip_pass": "ผ่าน",
         "chip_fail": "ไม่ผ่าน",
-        "chip_notrun": "ยังไม่ได้รัน",
+        "chip_notrun": "ยังไม่ได้ทดสอบ",
         "disabled_badge": "ปิด",
-        "confirm_delete": 'ลบการตรวจสอบ "{name}" ใช่หรือไม่?',
-        "new_check_title": "สร้างการตรวจสอบ",
+        "confirm_delete": 'ลบ "{name}" ใช่หรือไม่?',
+        "new_check_title": "สร้าง Test Case ใหม่",
         "edit_prefix": "แก้ไข: ",
-        "check_q": "ต้องการตรวจสอบอะไร?",
-        "check_q_ph": "เช่น คลิกปุ่ม 'สมัครสมาชิก' และตรวจสอบว่ามีฟอร์มที่มีช่องอีเมลและรหัสผ่านปรากฏขึ้น",
-        "desc_hint": "ระบบจะเปิดเว็บไซต์ให้อัตโนมัติ — เพียงอธิบายสถานการณ์และเกณฑ์ที่ถือว่าผ่าน",
+        "check_q": "ทดสอบอะไรดี ?",
+        "check_q_ph": "สามารถใช้ ภาษาไทย หรือ อังกฤษก็ได้ เช่น คลิกปุ่ม 'สมัครสมาชิก' และตรวจสอบว่ามีฟอร์มที่มีช่องอีเมลและรหัสผ่านปรากฏขึ้น",
+        "desc_hint": "ระบบจะเปิดเว็บไซต์เพื่อทดสอบให้อัตโนมัติ อธิบาย Test Scneario, Test Case และเงื่อนไขที่ทำให้เทสนี้ผ่าน (Pass)",
         "short_name": "ชื่อย่อ",
         "short_name_ph": "เช่น ฟอร์มสมัครสมาชิกปรากฏขึ้น",
         "id_auto": "id:",
@@ -425,11 +425,11 @@ I18N = {
         "start_label": "Start URL (ระบุเอง)",
         "start_ph": "เว้นว่างไว้เพื่อใช้เว็บไซต์ของคุณ",
         "start_login": "เริ่มที่ Login URL ก่อน",
-        "incl_runall": 'รวมใน "รันทั้งหมด"',
+        "incl_runall": 'รวมใน "ทดสอบทั้งหมด"',
         "max_steps": "จำนวนขั้นตอนสูงสุด",
         "cancel": "ยกเลิก",
         "save": "บันทึก",
-        "err_desc": "กรุณาอธิบายสิ่งที่ต้องการตรวจสอบ",
+        "err_desc": "กรุณาอธิบายสิ่งที่ต้องการทดสอบ",
         "err_save": "ไม่สามารถบันทึกได้",
         "settings_title": "ตั้งค่า",
         "grp_site": "เว็บไซต์ของคุณ",
@@ -454,32 +454,32 @@ I18N = {
         "tip_base": "เว็บไซต์ที่ AI จะเปิดและทดสอบ",
         "tip_key": "คีย์ Google Gemini ของคุณ เก็บไว้ในเครื่องนี้เท่านั้น",
         "tip_model": "Flash เร็วและประหยัด; Pro ช้ากว่าแต่ฉลาดกว่า",
-        "tip_login": "URL ที่ใช้เข้าสู่ระบบ ใช้กับการตรวจสอบที่ตั้งให้เริ่มที่ Login",
-        "tip_hint": "คำสั่งเพิ่มเติมที่ใช้กับทุกการตรวจสอบ (เช่น ปิดแบนเนอร์คุกกี้)",
+        "tip_login": "URL ที่ใช้เข้าสู่ระบบ ใช้กับการทดสอบที่ตั้งให้เริ่มที่ Login",
+        "tip_hint": "คำสั่งเพิ่มเติมที่ใช้กับทุกการทดสอบ (เช่น ปิดแบนเนอร์คุกกี้)",
         "tip_viewport": "ขนาดหน้าต่างเบราว์เซอร์ (พิกเซล)",
-        "tip_scale": "ความละเอียดพิกเซล ใช้ 2 สำหรับภาพมือถือที่คมขึ้น",
+        "tip_scale": "ความละเอียดพิกเซล ใช้ x2 สำหรับภาพมือถือที่คมขึ้น",
         "tip_ua": "ขั้นสูง: กำหนด user-agent ของเบราว์เซอร์เอง",
-        "tip_maxsteps": "จำกัดจำนวนการกระทำสูงสุดที่ AI ทำได้",
+        "tip_maxsteps": "จำกัดจำนวน Step (ขั้นตอน) สูงสุดที่ AI ทำได้",
         "tip_starturl": "เปิด URL นี้แทนที่อยู่เว็บไซต์ของคุณ",
         "waiting": "รอ",
         "running_step": "กำลังรัน… ขั้นตอนที่ {step}/{max}",
         "passed_word": "ผ่าน",
         "failed_word": "ไม่ผ่าน",
-        "head_running": "⏳ กำลังรัน…",
+        "head_running": "⏳ กำลังทดสอบ…",
         "head_done": "✅ เสร็จสิ้น",
         "head_stopped": "🛑 หยุดแล้ว",
         "head_error": "⚠️ เกิดข้อผิดพลาด",
-        "alert_busy": "มีการรันอยู่แล้ว กรุณารอให้เสร็จก่อน",
-        "alert_run_err": "เกิดข้อผิดพลาดในการรัน: ",
+        "alert_busy": "มีการทดสอบอยู่แล้ว กรุณารอให้เสร็จก่อน",
+        "alert_run_err": "เกิดข้อผิดพลาดในการทดสอบ: ",
         "about_title": "เกี่ยวกับเครื่องมือนี้",
         "about_made": "สร้างด้วย ❤️ โดย Sarun Peetasai",
-        "about_cause": "AI Web Tester เป็นซอฟต์แวร์ฟรีและโอเพนซอร์ส สร้างขึ้นเพื่อให้การทดสอบเว็บไซต์เป็นเรื่องง่ายสำหรับทุกคน — รวมถึงผู้ที่ไม่ใช่นักพัฒนาและทีมที่ถนัดภาษาไทย — เพียงอธิบายเป็นคำพูดธรรมดาก็ตรวจสอบเว็บไซต์ได้",
-        "about_contribute": "ยินดีรับการร่วมพัฒนาอย่างยิ่ง — ⭐ กดดาวให้โปรเจกต์ แจ้งปัญหา หรือส่ง pull request บน GitHub ทุกการช่วยเหลือมีความหมายต่อโปรเจกต์",
+        "about_cause": "AI Web Tester for Dummies เป็นซอฟต์แวร์ฟรีและโอเพนซอร์ส สร้างขึ้นเพื่อให้การทดสอบเว็บไซต์เป็นเรื่องง่ายสำหรับทุกคน โดยเฉพาะผู้ที่ไม่ใช่นักพัฒนาและทีมที่ถนัดภาษาไทย เพียงอธิบายเป็นคำพูดธรรมดาก็ตรวจสอบเว็บไซต์ได้",
+        "about_contribute": "Contrivute now ! ⭐ กดดาวให้โปรเจกต์ แจ้งปัญหา หรือส่ง pull request บน GitHub ได้เลย ขอบคุณครับ",
         "about_repo": "⭐ ซอร์สโค้ดและร่วมพัฒนา",
         "about_profile": "👤 GitHub",
         "about_site": "🌐 sarunp.com",
         "wiz_step": "ขั้นตอนที่ {n} จาก 3",
-        "wiz_welcome_title": "👋 ยินดีต้อนรับสู่ AI Web Tester",
+        "wiz_welcome_title": "👋 ยินดีต้อนรับสู่ AI Web Tester for Dummies",
         "wiz_welcome_body": "ตรวจสอบเว็บไซต์ของคุณด้วยภาษาธรรมดา มาตั้งค่ากันใน 3 ขั้นตอนง่าย ๆ",
         "wiz_key_title": "Gemini API key ของคุณ",
         "wiz_key_body": "เราใช้ Google Gemini (AI) ในการอ่านและคลิกบนเว็บไซต์ของคุณ วางคีย์ฟรี — เก็บไว้ในเครื่องนี้เท่านั้น",
@@ -568,7 +568,7 @@ WIZARD_HTML = ("""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
-<title data-i18n="setup_doc_title">Setup — AI Web Tester</title>
+<title data-i18n="setup_doc_title">Setup — AI Web Tester for Dummies</title>
 <style>""" + _BASE_CSS + """
 body{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px}
 .wiz{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;max-width:480px;width:100%;box-shadow:0 8px 30px rgba(16,24,40,.08)}
@@ -654,7 +654,7 @@ INDEX_HTML = ("""<!doctype html><html lang="th"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
-<title data-i18n="doc_title">AI Web Tester</title>
+<title data-i18n="doc_title">AI Web Tester for Dummies</title>
 <style>""" + _BASE_CSS + """
 header{display:flex;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5}
 header h1{font-size:17px;margin:0}
@@ -720,7 +720,7 @@ iframe{width:100%;height:78vh;border:1px solid var(--line);border-radius:10px;ba
 .about-cause{color:var(--mut)}
 </style></head><body>
 <header>
-  <h1>🌐 AI Web Tester</h1>
+  <h1>🌐 AI Web Tester for Dummies</h1>
   <button class="chip-btn" id="siteChip" onclick="openSettings()"></button>
   <span class="spacer"></span>
   """ + _LANG_SWITCH_HTML + """
@@ -1122,7 +1122,7 @@ def main():
         print("❌ No free port between 8765-8775. Close other apps and retry.")
         return
     url = f"http://{host}:{port}/"
-    print(f"\n✅ AI Web Tester is running.\n   Open this in your browser:  {url}\n   (Keep this window open. Press Ctrl+C to stop.)\n")
+    print(f"\n✅ AI Web Tester for Dummies is running.\n   Open this in your browser:  {url}\n   (Keep this window open. Press Ctrl+C to stop.)\n")
     threading.Timer(1.0, lambda: webbrowser.open(url)).start()
     uvicorn.run(app, host=host, port=port, log_level="warning")
 

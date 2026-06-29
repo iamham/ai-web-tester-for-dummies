@@ -1,4 +1,4 @@
-# AI Web Tester — คู่มือการใช้งาน
+# AI Web Tester for Dummies — คู่มือการใช้งาน
 
 > 🇬🇧 English: see **[QA_GUIDE.md](QA_GUIDE.md)**
 

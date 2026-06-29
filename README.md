@@ -1,4 +1,4 @@
-# AI Web Tester
+# AI Web Tester for Dummies
 
 Test any website in plain English. An LLM (Google Gemini) drives a real Chromium
 browser to carry out test cases you write as everyday sentences — *"open the

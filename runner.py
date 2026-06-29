@@ -1,5 +1,5 @@
 """
-Shared core for the AI Web Tester.
+Shared core for the AI Web Tester for Dummies.
 
 Both the CLI (`cli.py`) and the web app (`app.py`) import from here, so test
 execution behaves identically no matter how it's launched.
@@ -359,8 +359,8 @@ async def run_test(
 
 
 REPORT_TITLES = {
-    "en": "AI Web Tester — Report",
-    "th": "AI Web Tester — รายงานผลการทดสอบ",
+    "en": "AI Web Tester for Dummies — Report",
+    "th": "AI Web Tester for Dummies — รายงานผลการทดสอบ",
 }
 
 

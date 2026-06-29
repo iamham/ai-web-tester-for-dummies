@@ -1,5 +1,5 @@
 """
-Command-line runner for the AI Web Tester (for developers / CI).
+Command-line runner for the AI Web Tester for Dummies (for developers / CI).
 
 Test cases live in `tests/*.yaml`. Non-technical users should use the web app
 instead — double-click the launcher, or run `python app.py`.
