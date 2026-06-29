@@ -1,5 +1,9 @@
 # AI Web Tester for Dummies
 
+<center>
+<img width="1024" height="1536" alt="ChatGPT Image Jun 29, 2026, 03_59_17 PM" src="https://github.com/user-attachments/assets/2a639116-64c7-41f3-9ae6-97cafc015189" />
+</center>
+
 Test any website in plain English. An LLM (Google Gemini) drives a real Chromium
 browser to carry out test cases you write as everyday sentences — *"open the
 first product, add it to the cart, and confirm it appears"* — and produces a
