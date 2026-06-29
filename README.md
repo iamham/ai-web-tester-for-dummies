@@ -28,6 +28,12 @@ There are two ways to use it:
 
 ---
 
+## Screenshots
+
+| English | ไทย |
+|---------|-----|
+| ![AI Web Tester for Dummies — English UI](assets/screenshot-en.png) | ![AI Web Tester for Dummies — Thai UI](assets/screenshot-th.png) |
+
 ## For non-technical users (web app)
 
 Double-click the launcher for your OS — it installs everything on first run, then
